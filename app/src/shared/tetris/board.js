@@ -1,5 +1,4 @@
-export const BOARD_WIDTH = 10;
-export const BOARD_HEIGHT = 20;
+import { BOARD_WIDTH, BOARD_HEIGHT } from './constants.js';
 
 export function createEmptyBoard() {
     return Array.from({ length: BOARD_HEIGHT }, () =>

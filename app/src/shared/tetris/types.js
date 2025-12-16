@@ -2,7 +2,7 @@
  * Tetrimino instance
  * @typedef {Object} Piece
  * @property {string} type              // 'I' | 'O' | 'T' | 'S' | 'Z' | 'J' | 'L'
- * @property {{x:number,y:number}} pos  // top-left–relative board position of the pivot
+ * @property {{x:number,y:number}} pos  // board coordinate of the piece pivot
  * @property {number} rotation          // 0–3 (clockwise 90° steps)
  */
 
