@@ -5,6 +5,7 @@
 // rotate
 // drop soft (down)
 // drop hard (space)
+import { BOARD_WIDTH, BOARD_HEIGHT, isInsideBoard, isCellEmpty } from '.';
 
 export function canPlacePiece(board, piece) {
     return piece.shape.every(([dx, dy]) => {

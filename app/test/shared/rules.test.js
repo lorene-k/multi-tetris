@@ -1,4 +1,8 @@
 import { expect } from "chai";
+import {
+    canPlacePiece, mergePiece, clearLines, isGameOver,
+    BOARD_WIDTH, BOARD_HEIGHT, PIECES, createEmptyBoard
+} from "../../src/shared/tetris";
 
 describe('rules.js', () => {
     describe('canPlacePiece', () => {
