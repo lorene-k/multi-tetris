@@ -22,6 +22,7 @@ asynchronous systems, and scalable multiplayer design.
 - **Shared Logic:** Pure functional modules (no mutation)
 - **Styling:** CSS Grid / Flexbox
 - **Testing:** Mocha, Chai
+- **Test coverage:** nyc (Instanbul)
 - **Build Tools:** Webpack, Babel
 - **Real-time Communication:** Socket.IO
 
