@@ -1,60 +1,208 @@
 import { expect } from "chai";
 import {
+    BOARD_WIDTH, BOARD_HEIGHT, PIECES, createEmptyBoard,
     canPlacePiece, mergePiece, clearLines, isGameOver,
-    BOARD_WIDTH, BOARD_HEIGHT, PIECES, createEmptyBoard
+    movePiece, rotatePiece, hardDrop, softDrop, addPenaltyLines,
+    createPiece, getPieceShape
 } from "../../src/shared/tetris";
 
 describe('rules.js', () => {
     describe('canPlacePiece', () => {
         let board;
         let piece;
-
         beforeEach(() => {
             board = createEmptyBoard();
-            piece = {
-                shape: PIECES['O'].shape,
-                pos: { x: 0, y: 0 },
-                type: 1
-            };
+            piece = createPiece({ type: 'O', pos: { x: 0, y: 0 } });
         });
-
         it('should return true if piece can be placed', () => {
             expect(canPlacePiece(board, piece)).to.be.true;
         });
-
         it('should return false if piece cannot be placed', () => {
             board[0][0] = 1;
             expect(canPlacePiece(board, piece)).to.be.false;
         });
     });
 
+    describe('movePiece', () => {
+        let board;
+        let state;
+        beforeEach(() => {
+            board = createEmptyBoard();
+            state = {
+                board,
+                activePiece: createPiece({ type: 'O' }),
+            };
+        });
+        it('should return the same state if there is no active piece', () => {
+            const newState = movePiece({ state, activePiece: null }, 'left');
+            expect(newState).to.deep.equal({ state, activePiece: null });
+        });
+        it('should return state for an invalid direction', () => {
+            const newState = movePiece(state, 'invalid');
+            expect(newState).to.deep.equal(state);
+        });
+
+        const directions = {
+            left: { dx: -1, dy: 0 },
+            right: { dx: 1, dy: 0 },
+            down: { dx: 0, dy: 1 },
+        };
+        Object.entries(directions).forEach(([dir, delta]) => {
+            it(`moves piece ${dir} if possible`, () => {
+                const newState = movePiece(state, dir);
+                expect(newState.activePiece.pos.x).to.equal(state.activePiece.pos.x + delta.dx);
+                expect(newState.activePiece.pos.y).to.equal(state.activePiece.pos.y + delta.dy);
+            });
+            it(`does not move piece ${dir} if blocked`, () => {
+                if (dir === 'left') state.activePiece.pos.x = 0;
+                if (dir === 'right') state.activePiece.pos.x = BOARD_WIDTH - 1;
+                if (dir === 'down') state.activePiece.pos.y = BOARD_HEIGHT - 1;
+                const newState = movePiece(state, dir);
+                expect(newState.activePiece.pos).to.deep.equal(state.activePiece.pos);
+            });
+        });
+    });
+
+    describe('rotatePiece', () => {
+        let board;
+        let state;
+        beforeEach(() => {
+            board = createEmptyBoard();
+            state = {
+                board,
+                activePiece: createPiece({ type: 'O' }),
+            };
+        });
+        it('should rotate piece if possible', () => {
+            const newState = rotatePiece(state, 'left');
+            expect(newState.shape).to.not.deep.equal(state);
+        });
+        it('should not rotate piece if blocked', () => {
+            board[0][4] = 1;
+            const newState = rotatePiece(state, 'right');
+            expect(newState).to.deep.equal(state);
+        });
+        it('should return the same state if there is no active piece', () => {
+            const newState = rotatePiece({ state, activePiece: null }, 'right');
+            expect(newState).to.deep.equal({ state, activePiece: null });
+        });
+        it('should return the same state for an invalid direction', () => {
+            const newState = rotatePiece(state, 'invalid');
+            expect(newState).to.deep.equal(state);
+        });
+    });
+
+    describe('hardDrop', () => {
+        let state;
+        let board;
+        beforeEach(() => {
+            board = createEmptyBoard();
+            state = {
+                board,
+                activePiece: createPiece({ type: 'O' }),
+            };
+        });
+        it('should hard drop the piece to the lowest possible position', () => {
+            const { board, activePiece } = state;
+            let expectedY = activePiece.pos.y;
+            while (canPlacePiece(board, { ...activePiece, pos: { x: activePiece.pos.x, y: expectedY + 1 }, })) {
+                expectedY++;
+            }
+            const newState = hardDrop(state);
+            const shape = getPieceShape(activePiece);
+
+            shape.forEach(([dx, dy]) => {
+                const x = activePiece.pos.x + dx;
+                const y = expectedY + dy;
+                expect(newState.board[y][x]).to.equal(activePiece.type);
+            });
+        });
+        it('should return the same state if there is no active piece', () => {
+            const newState = hardDrop({ state, activePiece: null });
+            expect(newState).to.deep.equal({ state, activePiece: null });
+        });
+        it('should not modify the original state', () => {
+            const stateCopy = JSON.parse(JSON.stringify(state));
+            hardDrop(state);
+            expect(state).to.deep.equal(stateCopy);
+        });
+    });
+
+    describe('softDrop', () => {
+        let state;
+        let board;
+        beforeEach(() => {
+            board = createEmptyBoard();
+            state = {
+                board,
+                activePiece: createPiece({ type: 'O' }),
+            };
+        });
+        it('should soft drop the piece by one row if possible', () => {
+            const newState = softDrop(state);
+            expect(newState.activePiece.pos.y).to.equal(state.activePiece.pos.y + 1);
+        });
+        it('should not move the piece if blocked', () => {
+            state.activePiece.pos.y = BOARD_HEIGHT - 1;
+            const newState = softDrop(state);
+            expect(newState.activePiece.pos.y).to.equal(state.activePiece.pos.y);
+        });
+        it('should return the same state if there is no active piece', () => {
+            const newState = softDrop({ state, activePiece: null });
+            expect(newState).to.deep.equal({ state, activePiece: null });
+        });
+    });
+
+    describe('addPenaltyLines', () => {
+        let board;
+        let newBoard;
+        const penaltyLines = 2;
+        beforeEach(() => {
+            board = createEmptyBoard();
+            newBoard = addPenaltyLines(board, penaltyLines);
+        });
+        it('should add penalty lines at the bottom and shift the board up', () => {
+            expect(newBoard).to.have.lengthOf(BOARD_HEIGHT);
+            const bottomRows = newBoard.slice(-penaltyLines);
+            bottomRows.forEach(row => {
+                const zeros = row.filter(cell => cell === 0).length;
+                const ones = row.filter(cell => cell === 1).length;
+                expect(zeros).to.equal(1);
+                expect(ones).to.equal(BOARD_WIDTH - 1);
+            });
+            const upperRows = newBoard.slice(0, BOARD_HEIGHT - penaltyLines);
+            upperRows.forEach(row =>
+                row.forEach(cell => expect(cell).to.equal(0))
+            );
+        });
+        it('should not modify the original board', () => {
+            const boardCopy = JSON.parse(JSON.stringify(board));
+            addPenaltyLines(board, penaltyLines);
+            expect(board).to.deep.equal(boardCopy);
+        });
+    });
+
     describe('mergePiece', () => {
         let board;
         let piece;
+        let shape;
         let newBoard;
-
         beforeEach(() => {
             board = createEmptyBoard();
-            piece = {
-                shape: PIECES['O'].shape,
-                pos: { x: 0, y: 0 },
-                type: 1
-            };
+            piece = createPiece({ type: 'O', pos: { x: 0, y: 0 } });
+            shape = getPieceShape(piece);
             newBoard = mergePiece(board, piece);
         });
-
         it('should merge piece into the board', () => {
-            piece.shape.forEach(([dx, dy]) => {
+            shape.forEach(([dx, dy]) => {
                 expect(newBoard[piece.pos.y + dy][piece.pos.x + dx]).to.equal(piece.type);
             });
         });
-
         it('should not modify the original board', () => {
-            piece.shape.forEach(([dx, dy]) => {
+            shape.forEach(([dx, dy]) => {
                 expect(board[piece.pos.y + dy][piece.pos.x + dx]).to.equal(0);
             });
         });
-
         it('should not merge piece cells that are out of the board boundaries', () => {
             piece.pos = { x: BOARD_WIDTH - 1, y: BOARD_HEIGHT - 1 };
             const outOfBoundsBoard = mergePiece(board, piece);
@@ -64,11 +212,9 @@ describe('rules.js', () => {
 
     describe('clearLines', () => {
         let board;
-
         beforeEach(() => {
             board = createEmptyBoard();
         });
-
         it('should clear full lines and return the number of cleared lines', () => {
             for (let x = 0; x < BOARD_WIDTH; x++) {
                 board[BOARD_HEIGHT - 1][x] = 1;
@@ -77,7 +223,6 @@ describe('rules.js', () => {
             expect(result.clearedLines).to.equal(1);
             expect(result.board[BOARD_HEIGHT - 1].every(cell => cell === 0)).to.be.true;
         });
-
         it('should not clear any lines if none are full', () => {
             const result = clearLines(board);
             expect(result.clearedLines).to.equal(0);
@@ -87,16 +232,13 @@ describe('rules.js', () => {
 
     describe('isGameOver', () => {
         let board;
-
         beforeEach(() => {
             board = createEmptyBoard();
         });
-
         it('should return true if the top row has occupied cells', () => {
             board[0][0] = 1;
             expect(isGameOver(board)).to.be.true;
         });
-
         it('should return false if the top row is empty', () => {
             expect(isGameOver(board)).to.be.false;
         });
