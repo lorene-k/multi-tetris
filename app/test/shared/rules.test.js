@@ -1,9 +1,10 @@
 import { expect } from "chai";
 import {
-    BOARD_WIDTH, BOARD_HEIGHT, PIECES, createEmptyBoard,
+    BOARD_WIDTH, BOARD_HEIGHT, createEmptyBoard,
     canPlacePiece, mergePiece, clearLines, isGameOver,
     movePiece, rotatePiece, hardDrop, softDrop, addPenaltyLines,
-    createPiece, getPieceShape
+    createPiece, getPieceShape, create,
+    createGameState
 } from "../../src/shared/tetris";
 
 describe('rules.js', () => {
@@ -24,14 +25,11 @@ describe('rules.js', () => {
     });
 
     describe('movePiece', () => {
-        let board;
         let state;
+        let activePiece;
         beforeEach(() => {
-            board = createEmptyBoard();
-            state = {
-                board,
-                activePiece: createPiece({ type: 'O' }),
-            };
+            activePiece = createPiece({ type: 'O' });
+            state = createGameState(activePiece);
         });
         it('should return the same state if there is no active piece', () => {
             const newState = movePiece({ state, activePiece: null }, 'left');
@@ -64,21 +62,18 @@ describe('rules.js', () => {
     });
 
     describe('rotatePiece', () => {
-        let board;
+        let activePiece;
         let state;
         beforeEach(() => {
-            board = createEmptyBoard();
-            state = {
-                board,
-                activePiece: createPiece({ type: 'O' }),
-            };
+            activePiece = createPiece({ type: 'O' });
+            state = createGameState(activePiece);
         });
         it('should rotate piece if possible', () => {
             const newState = rotatePiece(state, 'left');
             expect(newState.shape).to.not.deep.equal(state);
         });
         it('should not rotate piece if blocked', () => {
-            board[0][4] = 1;
+            state.board[0][4] = 1;
             const newState = rotatePiece(state, 'right');
             expect(newState).to.deep.equal(state);
         });
@@ -93,14 +88,11 @@ describe('rules.js', () => {
     });
 
     describe('hardDrop', () => {
+        let activePiece;
         let state;
-        let board;
         beforeEach(() => {
-            board = createEmptyBoard();
-            state = {
-                board,
-                activePiece: createPiece({ type: 'O' }),
-            };
+            activePiece = createPiece({ type: 'O' });
+            state = createGameState(activePiece);
         });
         it('should hard drop the piece to the lowest possible position', () => {
             const { board, activePiece } = state;
@@ -129,14 +121,11 @@ describe('rules.js', () => {
     });
 
     describe('softDrop', () => {
+        let activePiece;
         let state;
-        let board;
         beforeEach(() => {
-            board = createEmptyBoard();
-            state = {
-                board,
-                activePiece: createPiece({ type: 'O' }),
-            };
+            activePiece = createPiece({ type: 'O' });
+            state = createGameState(activePiece);
         });
         it('should soft drop the piece by one row if possible', () => {
             const newState = softDrop(state);
