@@ -25,9 +25,9 @@ export const createPiece = ({ type, pos = SPAWN_POSITION(), rotation = 0 }) => (
     pos,
 })
 
-export const createGameState = () => ({
+export const createGameState = (activePiece = null) => ({
     board: createEmptyBoard(),
-    activePiece: null,
+    activePiece,
     nextPieces: [],
     gameOver: false,
 })
