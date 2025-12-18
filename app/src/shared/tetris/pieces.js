@@ -1,3 +1,5 @@
+import { rotateN } from ".";
+
 export const PIECES = {
     I: {
         pivot: { x: 1.5, y: 0.5 },
@@ -65,3 +67,8 @@ export const PIECES = {
 }
 
 export const PIECE_TYPES = Object.keys(PIECES);
+
+export function getPieceShape(piece) {
+    const shape = PIECES[piece.type].shape;
+    return rotateN(shape, piece.rotation);
+}
