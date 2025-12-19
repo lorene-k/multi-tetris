@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { createPiece } from '../../src/shared/tetris';
+import { createPiece, createGameState } from '../../src/shared/tetris';
 
 describe('types.js', () => {
     describe('createPiece', () => {
@@ -15,6 +15,19 @@ describe('types.js', () => {
             expect(piece.pos).to.deep.equal({ x: 4, y: 0 });
             expect(piece.rotation).to.equal(0);
             expect(piece.type).to.equal('O');
+        });
+    });
+
+    describe('createGameState', () => {
+        it('defaults activePiece to null and gameOver to false if not provided', () => {
+            const state = createGameState();
+            expect(state.activePiece).to.equal(null);
+            expect(state.gameOver).to.equal(false);
+        });
+        it('creates an empty board', () => {
+            const state = createGameState();
+            expect(state.board.length).to.equal(20);
+            expect(state.board[0].length).to.equal(10);
         });
     });
 });

@@ -113,5 +113,6 @@ export function clearLines(board) {
 }
 
 export function isGameOver(board) {
+    if (!board || !board.length) return true;
     return board[0].some(cell => cell !== 0);
 }

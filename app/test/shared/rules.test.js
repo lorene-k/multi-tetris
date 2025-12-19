@@ -150,7 +150,7 @@ describe('rules.js', () => {
             board = createEmptyBoard();
             newBoard = addPenaltyLines(board, penaltyLines);
         });
-        it('should add penalty lines at the bottom and shift the board up', () => {
+        it('adds penalty lines at the bottom and shift the board up', () => {
             expect(newBoard).to.have.lengthOf(BOARD_HEIGHT);
             const bottomRows = newBoard.slice(-penaltyLines);
             bottomRows.forEach(row => {
@@ -164,7 +164,7 @@ describe('rules.js', () => {
                 row.forEach(cell => expect(cell).to.equal(0))
             );
         });
-        it('should not modify the original board', () => {
+        it('does not modify the original board', () => {
             const boardCopy = JSON.parse(JSON.stringify(board));
             addPenaltyLines(board, penaltyLines);
             expect(board).to.deep.equal(boardCopy);
@@ -182,17 +182,17 @@ describe('rules.js', () => {
             shape = getPieceShape(piece);
             newBoard = mergePiece(board, piece);
         });
-        it('should merge piece into the board', () => {
+        it('merges piece into the board', () => {
             shape.forEach(([dx, dy]) => {
                 expect(newBoard[piece.pos.y + dy][piece.pos.x + dx]).to.equal(piece.type);
             });
         });
-        it('should not modify the original board', () => {
+        it('does not modify the original board', () => {
             shape.forEach(([dx, dy]) => {
                 expect(board[piece.pos.y + dy][piece.pos.x + dx]).to.equal(0);
             });
         });
-        it('should not merge piece cells that are out of the board boundaries', () => {
+        it('does not merge piece cells that are out of the board boundaries', () => {
             piece.pos = { x: BOARD_WIDTH - 1, y: BOARD_HEIGHT - 1 };
             const outOfBoundsBoard = mergePiece(board, piece);
             expect(outOfBoundsBoard[BOARD_HEIGHT - 1][BOARD_WIDTH - 1]).to.equal(piece.type);
@@ -204,7 +204,7 @@ describe('rules.js', () => {
         beforeEach(() => {
             board = createEmptyBoard();
         });
-        it('should clear full lines and return the number of cleared lines', () => {
+        it('clears full lines and return the number of cleared lines', () => {
             for (let x = 0; x < BOARD_WIDTH; x++) {
                 board[BOARD_HEIGHT - 1][x] = 1;
             }
@@ -212,7 +212,7 @@ describe('rules.js', () => {
             expect(result.clearedLines).to.equal(1);
             expect(result.board[BOARD_HEIGHT - 1].every(cell => cell === 0)).to.be.true;
         });
-        it('should not clear any lines if none are full', () => {
+        it('does not clear any lines if none are full', () => {
             const result = clearLines(board);
             expect(result.clearedLines).to.equal(0);
             expect(result.board).to.deep.equal(board);
@@ -224,12 +224,18 @@ describe('rules.js', () => {
         beforeEach(() => {
             board = createEmptyBoard();
         });
-        it('should return true if the top row has occupied cells', () => {
+        it('returns true if the top row has occupied cells', () => {
             board[0][0] = 1;
             expect(isGameOver(board)).to.be.true;
         });
-        it('should return false if the top row is empty', () => {
+        it('returns false if the top row is empty', () => {
             expect(isGameOver(board)).to.be.false;
+        });
+        it('returns true if the board is null or empty', () => {
+            const emptyBoard = [];
+            const nullBoard = null;
+            expect(isGameOver(emptyBoard)).to.be.true;
+            expect(isGameOver(nullBoard)).to.be.true;
         });
     });
 });
