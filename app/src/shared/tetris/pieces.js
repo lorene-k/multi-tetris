@@ -72,3 +72,12 @@ export function getPieceShape(piece) {
     const shape = PIECES[piece.type].shape;
     return rotateN(shape, piece.rotation);
 }
+
+export function generateRandomPiece(rng) {
+    const index = Math.floor(rng() * PIECE_TYPES.length);
+    return PIECE_TYPES[index];
+}
+
+export function generateRandomQueue(rng) {
+    return Array.from({ length: 7 }, () => generateRandomPiece(rng));
+}
