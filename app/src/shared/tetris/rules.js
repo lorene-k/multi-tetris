@@ -35,7 +35,7 @@ export function movePiece(state, direction) {
     return state;
 }
 
-export function rotatePiece(state, direction) {
+export function rotatePiece(state, direction = 'right') {
     const { board, activePiece } = state;
     if (!activePiece) return state;
     if (direction !== 'left' && direction !== 'right') return state;

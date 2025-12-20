@@ -1,4 +1,4 @@
-import { createPiece, isGameOver, mergePiece, softDrop, clearLines } from "../../shared/tetris";
+import { createPiece, isGameOver, mergePiece, softDrop, clearLines, PIECE_TYPES } from "../../shared/tetris";
 
 export function step(state) {
     let droppedState = softDrop(state);
@@ -7,7 +7,8 @@ export function step(state) {
         const mergedBoard = mergePiece(state.board, state.activePiece);
         const { board: clearedBoard, clearedLines } = clearLines(mergedBoard);
         const nextPieces = [...state.nextPieces];
-        const nextType = nextPieces.length > 0 ? nextPieces.shift() : 'O';
+        if (nextPieces.length === 0) nextPieces.push(...generateRandomQueue());
+        const nextType = nextPieces.shift();
         const newState = {
             ...state,
             board: clearedBoard,
@@ -26,6 +27,14 @@ export function step(state) {
     return droppedState;
 }
 
+export function generateRandomPiece() {
+    const index = Math.floor(Math.random() * PIECE_TYPES.length);
+    return PIECE_TYPES[index];
+}
+
+export function generateRandomQueue() {
+    return Array.from({ length: 7 }, () => generateRandomPiece());
+}
 
 // export function gameLoop() {
 //     let activePiece = createPiece({ type: 'T' });
