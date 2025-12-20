@@ -17,7 +17,7 @@ describe('Fake server test', function () {
     after(function (done) { tetrisServer.stop(done) })
 
     describe('HTTP Server', function () {
-        it('should serve index.html for root path', function (done) {
+        it('serves index.html for root path', function (done) {
             http.get(params.server.url, (res) => {
                 expect(res.statusCode).to.equal(200)
                 let data = ''
@@ -29,7 +29,7 @@ describe('Fake server test', function () {
             }).on('error', done)
         })
 
-        it('should return 500 if bundle.js does not exist', function (done) {
+        it('returns 500 if bundle.js does not exist', function (done) {
             http.get(params.server.url + '/bundle.js', (res) => {
                 expect(res.statusCode).to.equal(500)
                 let data = ''
@@ -41,7 +41,7 @@ describe('Fake server test', function () {
             }).on('error', done)
         })
 
-        it('should serve index.html for unknown paths', function (done) {
+        it('serves index.html for unknown paths', function (done) {
             http.get(params.server.url + '/some-other-path', (res) => {
                 expect(res.statusCode).to.equal(200)
                 done()
@@ -50,7 +50,7 @@ describe('Fake server test', function () {
     })
 
     describe('Socket.IO Server', function () {
-        it('should connect socket', function (done) {
+        it('connects socket', function (done) {
             const socket = io(params.server.url)
             socket.on('connect', () => {
                 expect(socket.connected).to.equal(true)
@@ -60,7 +60,7 @@ describe('Fake server test', function () {
             socket.on('connect_error', done)
         })
 
-        it('should pong on ping', function (done) {
+        it('sends pong on ping', function (done) {
             const initialState = {}
             const socket = io(params.server.url)
             const store = configureStore(rootReducer, socket, initialState, {
@@ -75,7 +75,7 @@ describe('Fake server test', function () {
             socket.on('connect_error', done)
         })
 
-        it('should handle non-ping actions', function (done) {
+        it('handles non-ping actions', function (done) {
             const socket = io(params.server.url)
             socket.on('connect', () => {
                 socket.emit('action', { type: 'server/some-other-action' })

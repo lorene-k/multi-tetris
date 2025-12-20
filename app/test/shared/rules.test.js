@@ -15,10 +15,10 @@ describe('rules.js', () => {
             board = createEmptyBoard();
             piece = createPiece({ type: 'O', pos: { x: 0, y: 0 } });
         });
-        it('should return true if piece can be placed', () => {
+        it('returns true if piece can be placed', () => {
             expect(canPlacePiece(board, piece)).to.be.true;
         });
-        it('should return false if piece cannot be placed', () => {
+        it('returns false if piece cannot be placed', () => {
             board[0][0] = 1;
             expect(canPlacePiece(board, piece)).to.be.false;
         });
@@ -31,11 +31,11 @@ describe('rules.js', () => {
             activePiece = createPiece({ type: 'O' });
             state = createGameState(activePiece);
         });
-        it('should return the same state if there is no active piece', () => {
+        it('returns the same state if there is no active piece', () => {
             const newState = movePiece({ state, activePiece: null }, 'left');
             expect(newState).to.deep.equal({ state, activePiece: null });
         });
-        it('should return state for an invalid direction', () => {
+        it('returns state for an invalid direction', () => {
             const newState = movePiece(state, 'invalid');
             expect(newState).to.deep.equal(state);
         });
@@ -68,20 +68,20 @@ describe('rules.js', () => {
             activePiece = createPiece({ type: 'O' });
             state = createGameState(activePiece);
         });
-        it('should rotate piece if possible', () => {
+        it('rotates piece if possible', () => {
             const newState = rotatePiece(state, 'left');
             expect(newState.shape).to.not.deep.equal(state);
         });
-        it('should not rotate piece if blocked', () => {
+        it('does not rotate piece if blocked', () => {
             state.board[0][4] = 1;
             const newState = rotatePiece(state, 'right');
             expect(newState).to.deep.equal(state);
         });
-        it('should return the same state if there is no active piece', () => {
+        it('returns the same state if there is no active piece', () => {
             const newState = rotatePiece({ state, activePiece: null }, 'right');
             expect(newState).to.deep.equal({ state, activePiece: null });
         });
-        it('should return the same state for an invalid direction', () => {
+        it('returns the same state for an invalid direction', () => {
             const newState = rotatePiece(state, 'invalid');
             expect(newState).to.deep.equal(state);
         });
@@ -94,7 +94,7 @@ describe('rules.js', () => {
             activePiece = createPiece({ type: 'O' });
             state = createGameState(activePiece);
         });
-        it('should hard drop the piece to the lowest possible position', () => {
+        it('hard drops the piece to the lowest possible position', () => {
             const { board, activePiece } = state;
             let expectedY = activePiece.pos.y;
             while (canPlacePiece(board, { ...activePiece, pos: { x: activePiece.pos.x, y: expectedY + 1 }, })) {
@@ -109,11 +109,11 @@ describe('rules.js', () => {
                 expect(newState.board[y][x]).to.equal(activePiece.type);
             });
         });
-        it('should return the same state if there is no active piece', () => {
+        it('returns the same state if there is no active piece', () => {
             const newState = hardDrop({ state, activePiece: null });
             expect(newState).to.deep.equal({ state, activePiece: null });
         });
-        it('should not modify the original state', () => {
+        it('does not modify the original state', () => {
             const stateCopy = JSON.parse(JSON.stringify(state));
             hardDrop(state);
             expect(state).to.deep.equal(stateCopy);
@@ -127,16 +127,16 @@ describe('rules.js', () => {
             activePiece = createPiece({ type: 'O' });
             state = createGameState(activePiece);
         });
-        it('should soft drop the piece by one row if possible', () => {
+        it('soft drops the piece by one row if possible', () => {
             const newState = softDrop(state);
             expect(newState.activePiece.pos.y).to.equal(state.activePiece.pos.y + 1);
         });
-        it('should not move the piece if blocked', () => {
+        it('does not move the piece if blocked', () => {
             state.activePiece.pos.y = BOARD_HEIGHT - 1;
             const newState = softDrop(state);
             expect(newState.activePiece.pos.y).to.equal(state.activePiece.pos.y);
         });
-        it('should return the same state if there is no active piece', () => {
+        it('returns the same state if there is no active piece', () => {
             const newState = softDrop({ state, activePiece: null });
             expect(newState).to.deep.equal({ state, activePiece: null });
         });
