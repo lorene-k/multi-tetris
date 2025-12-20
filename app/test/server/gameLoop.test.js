@@ -1,6 +1,6 @@
 import { expect } from 'chai';
-import { step, generateRandomPiece, generateRandomQueue } from '../../src/server/game/gameLoop.js';
-import { createGameState, createPiece, canPlacePiece, BOARD_WIDTH, BOARD_HEIGHT } from '../../src/shared/tetris';
+import { step, createRng } from '../../src/server/game/gameLoop.js';
+import { createGameState, createPiece, canPlacePiece, BOARD_WIDTH, BOARD_HEIGHT, generateRandomQueue } from '../../src/shared/tetris';
 
 describe('gameLoop.js', () => {
     let activePiece;
@@ -93,23 +93,22 @@ describe('gameLoop.js', () => {
         });
     });
 
-    describe('generateRandomPiece', () => {
-        it('returns a valid piece type', () => {
-            const pieceType = generateRandomPiece();
-            const validTypes = ['I', 'O', 'T', 'S', 'Z', 'J', 'L'];
-            expect(validTypes).to.include(pieceType);
+    describe('createRng', () => {
+        it('produces consistent random numbers for the same seed', () => {
+            const seed = 'test-seed';
+            const rng1 = createRng(seed);
+            const rng2 = createRng(seed);
+            const numbers1 = Array.from({ length: 5 }, () => rng1());
+            const numbers2 = Array.from({ length: 5 }, () => rng2());
+            expect(numbers1).to.deep.equal(numbers2);
         });
-    });
 
-    describe('generateRandomQueue', () => {
-        it('returns a valid queue with length 7', () => {
-            const queue = generateRandomQueue();
-            const validTypes = ['I', 'O', 'T', 'S', 'Z', 'J', 'L'];
-            expect(queue).to.be.an('array');
-            expect(queue).to.have.lengthOf(7);
-            queue.forEach((pieceType) => {
-                expect(validTypes).to.include(pieceType);
-            });
+        it('produces different random numbers for different seeds', () => {
+            const rng1 = createRng('seed-one');
+            const rng2 = createRng('seed-two');
+            const numbers1 = Array.from({ length: 5 }, () => rng1());
+            const numbers2 = Array.from({ length: 5 }, () => rng2());
+            expect(numbers1).to.not.deep.equal(numbers2);
         });
     });
 });
