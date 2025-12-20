@@ -85,6 +85,10 @@ describe('rules.js', () => {
             const newState = rotatePiece(state, 'invalid');
             expect(newState).to.deep.equal(state);
         });
+        it('rotates piece to the right by default', () => {
+            const newState = rotatePiece(state);
+            expect(newState.activePiece.rotation).to.equal((state.activePiece.rotation + 1) % 4);
+        });
     });
 
     describe('hardDrop', () => {

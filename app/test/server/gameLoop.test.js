@@ -1,8 +1,8 @@
 import { expect } from 'chai';
-import { step } from '../../src/server/game/gameLoop.js';
+import { step, generateRandomPiece, generateRandomQueue } from '../../src/server/game/gameLoop.js';
 import { createGameState, createPiece, canPlacePiece, BOARD_WIDTH, BOARD_HEIGHT } from '../../src/shared/tetris';
 
-describe('game.js', () => {
+describe('gameLoop.js', () => {
     let activePiece;
     let state;
     beforeEach(() => {
@@ -57,6 +57,58 @@ describe('game.js', () => {
             newState.board.forEach(row => {
                 const isEmpty = row.every(cell => cell === 0);
                 expect(isEmpty).to.equal(true);
+            });
+        });
+
+        it('returns new state with null activePiece when game is over', () => {
+            const addedLines = Array.from({ length: BOARD_HEIGHT - 1 }, () => {
+                const holeIndex = Math.floor(Math.random() * BOARD_WIDTH);
+                return Array.from({ length: BOARD_WIDTH }, (_, x) => (x === holeIndex ? 0 : 1));
+            });
+            const gameOverState = {
+                ...state,
+                board: [...state.board.slice(BOARD_HEIGHT - 1), ...addedLines],
+                gameOver: true,
+            };
+            const newState = step(gameOverState);
+            expect(newState.board).to.not.equal(null);
+            expect(newState.activePiece).to.equal(null);
+            expect(newState).to.not.deep.equal(gameOverState);
+        })
+
+        it('creates a random queue if nextPieces is empty', () => {
+            let y = activePiece.pos.y;
+            while (canPlacePiece(state.board, { ...activePiece, pos: { x: activePiece.pos.x, y: y + 1 } })) {
+                y++;
+            }
+
+            const emptyQueueState = {
+                ...state,
+                nextPieces: [],
+                activePiece: { ...activePiece, pos: { x: activePiece.pos.x, y: y } }
+            };
+            const newState = step(emptyQueueState);
+            expect(newState.nextPieces).to.be.an('array');
+            expect(newState.nextPieces).to.have.lengthOf(6);
+        });
+    });
+
+    describe('generateRandomPiece', () => {
+        it('returns a valid piece type', () => {
+            const pieceType = generateRandomPiece();
+            const validTypes = ['I', 'O', 'T', 'S', 'Z', 'J', 'L'];
+            expect(validTypes).to.include(pieceType);
+        });
+    });
+
+    describe('generateRandomQueue', () => {
+        it('returns a valid queue with length 7', () => {
+            const queue = generateRandomQueue();
+            const validTypes = ['I', 'O', 'T', 'S', 'Z', 'J', 'L'];
+            expect(queue).to.be.an('array');
+            expect(queue).to.have.lengthOf(7);
+            queue.forEach((pieceType) => {
+                expect(validTypes).to.include(pieceType);
             });
         });
     });
