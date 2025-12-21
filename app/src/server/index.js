@@ -7,6 +7,7 @@ import { dirname, join } from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+const projectRoot = join(__dirname, '..', '..');
 
 const logerror = debug('tetris:error')
     , loginfo = debug('tetris:info')
@@ -14,8 +15,8 @@ const logerror = debug('tetris:error')
 const initApp = (app, params, cb) => {
     const { host, port } = params
     const handler = (req, res) => {
-        const file = req.url === '/bundle.js' ? '/../../build/bundle.js' : '/../../index.html'
-        const filePath = join(__dirname, '../../', file);
+        const file = req.url === '/bundle.js' ? 'build/bundle.js' : 'index.html'
+        const filePath = join(projectRoot, file);
 
         fs.readFile(filePath, (err, data) => {
             if (err) {
@@ -26,7 +27,7 @@ const initApp = (app, params, cb) => {
             // const contentType = req.url === '/bundle.js' 
             //     ? 'application/javascript' 
             //     : 'text/html';
-            
+
             // res.writeHead(200, { 'Content-Type': contentType });
             res.writeHead(200)
             res.end(data)
