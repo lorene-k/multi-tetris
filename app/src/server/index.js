@@ -1,5 +1,12 @@
 import fs from 'fs'
 import debug from 'debug'
+import { createServer } from 'http';
+import { Server } from 'socket.io';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const logerror = debug('tetris:error')
     , loginfo = debug('tetris:info')
@@ -8,12 +15,19 @@ const initApp = (app, params, cb) => {
     const { host, port } = params
     const handler = (req, res) => {
         const file = req.url === '/bundle.js' ? '/../../build/bundle.js' : '/../../index.html'
-        fs.readFile(__dirname + file, (err, data) => {
+        const filePath = join(__dirname, '../../', file);
+
+        fs.readFile(filePath, (err, data) => {
             if (err) {
                 logerror(err)
                 res.writeHead(500)
                 return res.end('Error loading index.html')
             }
+            // const contentType = req.url === '/bundle.js' 
+            //     ? 'application/javascript' 
+            //     : 'text/html';
+            
+            // res.writeHead(200, { 'Content-Type': contentType });
             res.writeHead(200)
             res.end(data)
         })
@@ -38,23 +52,22 @@ const initEngine = io => {
     })
 }
 
-export function create(params) {
-    const promise = new Promise((resolve, reject) => {
-        const app = require('http').createServer()
+export async function create(params) {
+    return new Promise((resolve, reject) => {
+        const app = createServer();
         initApp(app, params, () => {
-            const io = require('socket.io')(app)
+            const io = new Server(app);
             const stop = (cb) => {
-                io.close()
+                io.close();
                 app.close(() => {
-                    app.unref()
-                })
-                loginfo(`Engine stopped.`)
-                cb()
-            }
+                    app.unref();
+                });
+                loginfo(`Engine stopped.`);
+                cb();
+            };
 
-            initEngine(io)
-            resolve({ stop })
-        })
-    })
-    return promise
+            initEngine(io);
+            resolve({ stop });
+        });
+    });
 }

@@ -1,4 +1,4 @@
-import { rotateN } from ".";
+import { rotateN } from "./index.js";
 
 export const PIECES = {
     I: {

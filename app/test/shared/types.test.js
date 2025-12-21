@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { createPiece, createGameState } from '../../src/shared/tetris';
+import { createPiece, createGameState } from '../../src/shared/tetris/index.js';
 
 describe('types.js', () => {
     describe('createPiece', () => {

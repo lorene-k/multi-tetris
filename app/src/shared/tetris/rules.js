@@ -1,4 +1,4 @@
-import { BOARD_WIDTH, BOARD_HEIGHT, isInsideBoard, isCellEmpty, rotateN, getPieceShape } from '.';
+import { BOARD_WIDTH, BOARD_HEIGHT, isInsideBoard, isCellEmpty, rotateN, getPieceShape } from './index.js';
 
 export function canPlacePiece(board, piece) {
     const shape = getPieceShape(piece);

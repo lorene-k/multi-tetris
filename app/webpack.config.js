@@ -1,21 +1,27 @@
-var path = require('path');
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
-module.exports = {
-  entry: './src/client/index.js',
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-  output: {
-    path: path.join(__dirname, 'build'),
-    filename: 'bundle.js'
-  },
+export default {
+    entry: './src/client/index.js',
 
-  module: {
-    loaders: [{
-      test: /\.js$/,
-      exclude: /node_modules/,
-      loader: 'babel',
-      query:{
-        presets: ["es2015", "react", "stage-0"]
-      }
-    }]
-  }
+    output: {
+        path: path.join(__dirname, 'build'),
+        filename: 'bundle.js'
+    },
+
+    module: {
+        loaders: [{
+            test: /\.js$/,
+            exclude: /node_modules/,
+            loader: 'babel',
+            query: {
+                presets: ['@babel/preset-env', '@babel/preset-react']
+            }
+        }]
+    }
 };
+

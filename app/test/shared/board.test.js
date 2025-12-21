@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import {
     createEmptyBoard, isInsideBoard, mergePiece, isCellEmpty, canPlacePiece,
     clearLines, isGameOver, BOARD_WIDTH, BOARD_HEIGHT, PIECES
-} from '../../src/shared/tetris';
+} from '../../src/shared/tetris/index.js';
 
 describe('board.js', () => {
 

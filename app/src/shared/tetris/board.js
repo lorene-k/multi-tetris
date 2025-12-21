@@ -1,4 +1,4 @@
-import { BOARD_WIDTH, BOARD_HEIGHT } from './constants.js';
+import { BOARD_WIDTH, BOARD_HEIGHT } from './index.js';
 
 export function createEmptyBoard() {
     return Array.from({ length: BOARD_HEIGHT }, () =>

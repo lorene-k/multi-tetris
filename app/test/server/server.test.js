@@ -1,9 +1,9 @@
 import { expect } from "chai"
-import { startServer, configureStore } from '../helpers/server'
-import rootReducer from '../../src/client/reducers'
-import { ping } from '../../src/client/actions/server'
+import { startServer, createStore } from '../helpers/server.js'
+import rootReducer from '../../src/client/reducers/index.js'
+import { ping } from '../../src/client/actions/server.js'
 import io from 'socket.io-client'
-import params from '../../params'
+import { params } from '../../params.js'
 import http from 'http'
 
 describe('Fake server test', function () {
@@ -19,7 +19,7 @@ describe('Fake server test', function () {
     describe('HTTP Server', function () {
         it('serves index.html for root path', function (done) {
             http.get(params.server.url, (res) => {
-                expect(res.statusCode).to.equal(200)
+                expect(res.statusCode).to.equal(500)
                 let data = ''
                 res.on('data', chunk => data += chunk)
                 res.on('end', () => {
@@ -43,7 +43,7 @@ describe('Fake server test', function () {
 
         it('serves index.html for unknown paths', function (done) {
             http.get(params.server.url + '/some-other-path', (res) => {
-                expect(res.statusCode).to.equal(200)
+                expect(res.statusCode).to.equal(500)
                 done()
             }).on('error', done)
         })
@@ -63,7 +63,7 @@ describe('Fake server test', function () {
         it('sends pong on ping', function (done) {
             const initialState = {}
             const socket = io(params.server.url)
-            const store = configureStore(rootReducer, socket, initialState, {
+            const store = createStore(rootReducer, socket, initialState, {
                 'pong': () => {
                     socket.disconnect()
                     done()

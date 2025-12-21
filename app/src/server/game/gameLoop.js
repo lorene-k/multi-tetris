@@ -1,7 +1,8 @@
-import { createPiece, isGameOver, mergePiece, softDrop, clearLines, generateRandomQueue } from "../../shared/tetris";
+import { createPiece, isGameOver, mergePiece, softDrop, clearLines, generateRandomQueue } from "../../shared/tetris/index.js";
+import seedrandom from "seedrandom";
 
 export function createRng(seed) {
-    return new Math.seedrandom(seed);
+    return new seedrandom(seed);
 }
 
 export function step(state, rng) {

@@ -1,26 +1,22 @@
-import React from 'react'
-import ReactDom from 'react-dom'
-import createLogger from 'redux-logger'
-import thunk from 'redux-thunk'
-import { createStore, applyMiddleware } from 'redux'
-import { Provider } from 'react-redux'
-import { storeStateMiddleWare } from './middleware/storeStateMiddleWare'
-import reducer from './reducers'
-import App from './containers/app'
-import { alert } from './actions/alert'
+import { createRoot } from 'react-dom/client';
+import { configureStore } from '@reduxjs/toolkit';
+import { Provider } from 'react-redux';
+import { storeStateMiddleWare } from './middleware/storeStateMiddleWare.js';
+import reducer from './reducers/index.js';
+import App from './containers/app.js';
+import { alert } from './actions/alert.js';
 
-const initialState = {}
-
-const store = createStore(
+const store = configureStore({
     reducer,
-    initialState,
-    applyMiddleware(thunk, createLogger())
-)
+    middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware().concat(storeStateMiddleWare),
+});
 
-ReactDom.render((
+const root = createRoot(document.getElementById('tetris'));
+root.render(
     <Provider store={store}>
         <App />
     </Provider>
-), document.getElementById('tetris'))
+);
 
-store.dispatch(alert('Soon, will be here a fantastic Tetris ...'))
+store.dispatch(alert('Soon, will be here a fantastic Tetris ...'));

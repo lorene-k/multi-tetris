@@ -1,5 +1,6 @@
 import { expect } from "chai";
-import { PIECES, getPieceShape, createPiece, generateRandomPiece, generateRandomQueue } from "../../src/shared/tetris";
+import { PIECES, getPieceShape, createPiece, generateRandomPiece, generateRandomQueue } from "../../src/shared/tetris/index.js";
+import { createRng } from "../../src/server/game/gameLoop.js";
 
 describe('pieces.js', () => {
     describe('getPieceShape', () => {
@@ -30,7 +31,8 @@ describe('pieces.js', () => {
 
     describe('generateRandomPiece', () => {
         it('returns a valid piece type', () => {
-            const pieceType = generateRandomPiece();
+            const rng = createRng('test-seed');
+            const pieceType = generateRandomPiece(rng);
             const validTypes = ['I', 'O', 'T', 'S', 'Z', 'J', 'L'];
             expect(validTypes).to.include(pieceType);
         });
@@ -38,7 +40,8 @@ describe('pieces.js', () => {
 
     describe('generateRandomQueue', () => {
         it('returns a valid queue with length 7', () => {
-            const queue = generateRandomQueue();
+            const rng = createRng('test-seed');
+            const queue = generateRandomQueue(rng);
             const validTypes = ['I', 'O', 'T', 'S', 'Z', 'J', 'L'];
             expect(queue).to.be.an('array');
             expect(queue).to.have.lengthOf(7);

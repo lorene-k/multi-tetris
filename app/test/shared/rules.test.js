@@ -3,9 +3,9 @@ import {
     BOARD_WIDTH, BOARD_HEIGHT, createEmptyBoard,
     canPlacePiece, mergePiece, clearLines, isGameOver,
     movePiece, rotatePiece, hardDrop, softDrop, addPenaltyLines,
-    createPiece, getPieceShape, create,
+    createPiece, getPieceShape,
     createGameState
-} from "../../src/shared/tetris";
+} from "../../src/shared/tetris/index.js";
 
 describe('rules.js', () => {
     describe('canPlacePiece', () => {

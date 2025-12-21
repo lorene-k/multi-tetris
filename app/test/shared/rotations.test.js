@@ -1,6 +1,6 @@
 import { expect } from 'chai';
-import { rotate90, rotateN } from '../../src/shared/tetris';
-import { PIECES, createEmptyBoard, createPiece } from '../../src/shared/tetris';
+import { rotate90, rotateN } from '../../src/shared/tetris/index.js';
+import { PIECES, createEmptyBoard, createPiece } from '../../src/shared/tetris/index.js';
 
 describe('rotations.js', () => {
 

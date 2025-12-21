@@ -1,4 +1,4 @@
-import { ALERT_POP } from '../actions/alert'
+import { ALERT_POP } from '../actions/alert.js'
 
 const reducer = (state = {} , action) => {
   switch(action.type){

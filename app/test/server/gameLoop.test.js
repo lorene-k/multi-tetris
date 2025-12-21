@@ -1,14 +1,17 @@
 import { expect } from 'chai';
 import { step, createRng } from '../../src/server/game/gameLoop.js';
-import { createGameState, createPiece, canPlacePiece, BOARD_WIDTH, BOARD_HEIGHT, generateRandomQueue } from '../../src/shared/tetris';
+import { createGameState, createPiece, canPlacePiece,
+    BOARD_WIDTH, BOARD_HEIGHT, generateRandomPiece } from '../../src/shared/tetris/index.js';
 
 describe('gameLoop.js', () => {
     let activePiece;
     let state;
+    let rng;
     beforeEach(() => {
         activePiece = createPiece({ type: 'I' });
         state = createGameState(activePiece);
         state.nextPieces = ['O', 'I', 'L', 'J', 'S', 'Z', 'T'];
+        rng = createRng('test-seed');
     });
 
     describe('step', () => {
@@ -18,7 +21,7 @@ describe('gameLoop.js', () => {
                 y++;
             }
             const pieceDownState = { ...state, activePiece: { ...activePiece, pos: { x: activePiece.pos.x, y: y } } };
-            const newState = step(pieceDownState);
+            const newState = step(pieceDownState, rng);
             const boardHasPiece = newState.board.some(row => row.some(cell => cell !== 0));
             expect(newState.board).to.not.deep.equal(pieceDownState.board);
             expect(newState.activePiece.type).to.equal('O');
@@ -26,7 +29,7 @@ describe('gameLoop.js', () => {
         });
 
         it('returns state after soft drop when possible', () => {
-            const newState = step(state);
+            const newState = step(state, rng);
             expect(newState.activePiece.pos.y).to.equal(state.activePiece.pos.y + 1);
             expect(newState.board).to.deep.equal(state.board);
         });
@@ -40,20 +43,20 @@ describe('gameLoop.js', () => {
                 ...state,
                 board: [...state.board.slice(BOARD_HEIGHT - 1), ...addedLines],
             };
-            const newState = step(gameOverState);
+            const newState = step(gameOverState, rng);
             expect(newState.gameOver).to.equal(true);
         });
 
         it('does not mutate the original state', () => {
             const stateCopy = JSON.parse(JSON.stringify(state));
-            step(state);
+            step(state, rng);
             expect(state).to.deep.equal(stateCopy);
         });
 
         it('clears full lines when possible', () => {
             const filledBoard = state.board.map(() => Array(BOARD_WIDTH).fill(1));
             const filledState = { ...state, board: filledBoard };
-            const newState = step(filledState);
+            const newState = step(filledState, rng);
             newState.board.forEach(row => {
                 const isEmpty = row.every(cell => cell === 0);
                 expect(isEmpty).to.equal(true);
@@ -70,7 +73,7 @@ describe('gameLoop.js', () => {
                 board: [...state.board.slice(BOARD_HEIGHT - 1), ...addedLines],
                 gameOver: true,
             };
-            const newState = step(gameOverState);
+            const newState = step(gameOverState, rng);
             expect(newState.board).to.not.equal(null);
             expect(newState.activePiece).to.equal(null);
             expect(newState).to.not.deep.equal(gameOverState);
@@ -81,34 +84,33 @@ describe('gameLoop.js', () => {
             while (canPlacePiece(state.board, { ...activePiece, pos: { x: activePiece.pos.x, y: y + 1 } })) {
                 y++;
             }
-
             const emptyQueueState = {
                 ...state,
                 nextPieces: [],
                 activePiece: { ...activePiece, pos: { x: activePiece.pos.x, y: y } }
             };
-            const newState = step(emptyQueueState);
+            const newState = step(emptyQueueState, rng);
             expect(newState.nextPieces).to.be.an('array');
             expect(newState.nextPieces).to.have.lengthOf(6);
         });
     });
 
     describe('createRng', () => {
-        it('produces consistent random numbers for the same seed', () => {
+        it('returns consistent random numbers for the same seed', () => {
             const seed = 'test-seed';
             const rng1 = createRng(seed);
             const rng2 = createRng(seed);
-            const numbers1 = Array.from({ length: 5 }, () => rng1());
-            const numbers2 = Array.from({ length: 5 }, () => rng2());
-            expect(numbers1).to.deep.equal(numbers2);
+            const num1 = generateRandomPiece(rng1);
+            const num2 = generateRandomPiece(rng2);
+            expect(num1).to.equal(num2);
         });
 
-        it('produces different random numbers for different seeds', () => {
+        it('returns different random numbers for different seeds', () => {
             const rng1 = createRng('seed-one');
             const rng2 = createRng('seed-two');
-            const numbers1 = Array.from({ length: 5 }, () => rng1());
-            const numbers2 = Array.from({ length: 5 }, () => rng2());
-            expect(numbers1).to.not.deep.equal(numbers2);
+            const num1 = generateRandomPiece(rng1);
+            const num2 = generateRandomPiece(rng2);
+            expect(num1).to.not.equal(num2);
         });
     });
 });
