@@ -22,10 +22,12 @@ describe('rotations.js', () => {
     });
 
     describe('rotateN', () => {
-        it('returns original shape after four rotations', () => {
+        it('returns original shape after 0 or 4 rotations', () => {
             Object.entries(PIECES).forEach(([type, piece]) => {
-                const rotated = rotateN(piece.shape, 4, piece.pivot);
-                expect(rotated).to.deep.equal(piece.shape);
+                const rotated4 = rotateN(piece.shape, piece.pivot, 4);
+                const rotated0 = rotateN(piece.shape, piece.pivot, 0);
+                expect(rotated4).to.deep.equal(piece.shape);
+                expect(rotated0).to.deep.equal(piece.shape);
             });
         });
     });

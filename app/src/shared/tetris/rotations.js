@@ -1,9 +1,9 @@
-const WALL_KICKS = [
-    { x: 0, y: 0 },
-    { x: 1, y: 0 },
-    { x: -1, y: 0 },
-    { x: 0, y: -1 },
-];
+// const WALL_KICKS = [
+//     { x: 0, y: 0 },
+//     { x: 1, y: 0 },
+//     { x: -1, y: 0 },
+//     { x: 0, y: -1 },
+// ];
 
 // const I_KICKS = [
 //     { x: 0, y: 0 },

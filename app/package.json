@@ -43,19 +43,20 @@
         "globals": "^15.14.0",
         "mocha": "^10.8.2",
         "nodemon": "^3.1.9",
+        "sinon": "^21.0.1",
         "webpack": "^5.104.1",
         "webpack-cli": "^5.1.4",
         "webpack-dev-server": "^5.2.2"
     },
     "c8": {
+        "all": true,
         "exclude": [
             "build/**",
             "dist/**",
             "test/**",
             "node_modules/**",
             "**/*.test.js"
-        ],
-        "all": true
+        ]
     },
     "babel": {
         "presets": [

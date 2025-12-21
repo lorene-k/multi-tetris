@@ -24,11 +24,6 @@ const initApp = (app, params, cb) => {
                 res.writeHead(500)
                 return res.end('Error loading index.html')
             }
-            // const contentType = req.url === '/bundle.js' 
-            //     ? 'application/javascript' 
-            //     : 'text/html';
-
-            // res.writeHead(200, { 'Content-Type': contentType });
             res.writeHead(200)
             res.end(data)
         })
@@ -66,7 +61,6 @@ export async function create(params) {
                 loginfo(`Engine stopped.`);
                 cb();
             };
-
             initEngine(io);
             resolve({ stop });
         });
