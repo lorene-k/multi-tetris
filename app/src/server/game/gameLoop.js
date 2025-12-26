@@ -32,6 +32,8 @@ export function step(state, rng) {
     return droppedState;
 }
 
+// ! add moves (input)
+// ! add last frame rotations 
 
 // export function gameLoop() {
 //     let activePiece = createPiece({ type: 'T' });
@@ -47,13 +49,3 @@ export function step(state, rng) {
 //         }
 //     }, TICK_RATE_MS);
 // }
-
-// add inputs
-// add piece queue generator
-
-// replace createPiece by spawnPiece
-
-// spawnPiece
-//      update nextPieces
-// const nextType = newState.nextPieces.shift();
-// newState.activePiece = createPiece({ type: nextType });

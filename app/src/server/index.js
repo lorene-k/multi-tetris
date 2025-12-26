@@ -1,30 +1,44 @@
-import fs from 'fs'
-import debug from 'debug'
+import fs from 'fs';
+import debug from 'debug';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import { join, extname, dirname } from "path";
+
+const mediaTypes = {
+    ".html": "text/html",
+    ".js": "application/javascript",
+    ".css": "text/css",
+    ".svg": "image/svg+xml",
+    ".png": "image/png",
+};
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const projectRoot = join(__dirname, '..', '..');
+const clientDist = join(projectRoot, 'src/client/dist');
 
 const logerror = debug('tetris:error')
     , loginfo = debug('tetris:info')
 
 const initApp = (app, params, cb) => {
     const { host, port } = params
+
     const handler = (req, res) => {
-        const file = req.url === '/bundle.js' ? 'build/bundle.js' : 'index.html'
-        const filePath = join(projectRoot, file);
+        const filePath = req.url === "/"
+            ? join(clientDist, "index.html")
+            : join(clientDist, req.url);
+
+        const ext = extname(filePath);
+        const contentType = mediaTypes[ext] || 'application/octet-stream';
 
         fs.readFile(filePath, (err, data) => {
             if (err) {
                 logerror(err)
                 res.writeHead(500)
-                return res.end('Error loading index.html')
+                return res.end('Not found')
             }
-            res.writeHead(200)
+            res.writeHead(200, { "Content-Type": contentType });
             res.end(data)
         })
     }

@@ -1,0 +1,92 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap");
+
+/* ---------- Global Reset ---------- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* ---------- Root Theme ---------- */
+:root {
+    --bg: #0e0f13;
+    --panel: #151720;
+    --grid: #1e2130;
+    --text: #e6e6eb;
+    --cyan: #16b5ca;
+    --blue: #0e2bd0;
+    --orange: #f89811;
+    --yellow: #f5eb84;
+    --green: #57f05f;
+    --purple: #cf46ea;
+    --red: #ff4343;
+}
+
+/* ---------- App Base ---------- */
+body {
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ---------- Layout ---------- */
+.app {
+    display: flex;
+    gap: 24px;
+    background: var(--panel);
+    padding: 24px;
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* ---------- Tetris Board ---------- */
+.board {
+    display: grid;
+    grid-template-columns: repeat(10, 28px);
+    grid-template-rows: repeat(20, 28px);
+    background: var(--grid);
+    padding: 6px;
+    border-radius: 12px;
+}
+
+/* ---------- Cells ---------- */
+.cell {
+    width: 28px;
+    height: 28px;
+    background: #111;
+    border-radius: 4px;
+}
+
+/* Piece colors */
+.cell.I {
+    background: var(--cyan);
+}
+
+.cell.J {
+    background: var(--blue);
+}
+
+.cell.L {
+    background: var(--orange);
+}
+
+.cell.O {
+    background: var(--yellow);
+}
+
+.cell.S {
+    background: var(--green);
+}
+
+.cell.T {
+    background: var(--purple);
+}
+
+.cell.Z {
+    background: var(--red);
+}
