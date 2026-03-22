@@ -1,7 +1,11 @@
 import { expect } from 'chai';
-import { step, createRng } from '../../src/server/game/gameLoop.js';
-import { createGameState, createPiece, canPlacePiece,
-    BOARD_WIDTH, BOARD_HEIGHT, generateRandomPiece } from '../../src/shared/tetris/index.js';
+import sinon from "sinon";
+import { step, createRng, gameLoop, applyInput } from '../../src/server/game/gameLoop.js';
+import {
+    createGameState, createPiece, canPlacePiece,
+    BOARD_WIDTH, BOARD_HEIGHT, TICK_RATE_MS,
+    generateRandomPiece,
+} from '../../src/shared/tetris/index.js';
 
 describe('gameLoop.js', () => {
     let activePiece;
@@ -111,6 +115,43 @@ describe('gameLoop.js', () => {
             const num1 = generateRandomPiece(rng1);
             const num2 = generateRandomPiece(rng2);
             expect(num1).to.not.equal(num2);
+        });
+    });
+
+    describe('gameLoop', () => {
+        let clock;
+        let gameLoop;
+
+        beforeEach(() => {
+            clock = sinon.useFakeTimers();
+            game = gameLoop();
+        });
+        afterEach(() => {
+            clock.restore();
+            game.stop();
+        });
+
+        it('initializes game state correctly', () => {
+            const initialState = game.getState();
+            expect(initialState).to.have.property('board');
+            expect(initialState).to.have.property('activePiece');
+            expect(initialState).to.have.property('nextPieces');
+            expect(initialState.nextPieces).to.be.an('array').that.has.lengthOf(6);
+        });
+
+        it("updates the game on each tick", () => {
+            const state1 = game.getState();
+            clock.tick(TICK_RATE_MS);
+            const state2 = game.getState();
+            expect(state2).to.not.equal(state1);
+        });
+
+        it("stops the loop and clears timer when gameOver", () => {
+            while (!currentState.gameOver) {
+                const currentState = game.getState();
+                if (currentState.gameOver) break;
+                clock.tick(TICK_RATE_MS);
+            }
         });
     });
 });

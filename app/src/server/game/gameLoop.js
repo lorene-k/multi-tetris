@@ -1,5 +1,10 @@
-import { createPiece, isGameOver, mergePiece, softDrop, clearLines, generateRandomQueue } from "../../shared/tetris/index.js";
 import seedrandom from "seedrandom";
+import {
+    createPiece, createGameState, isGameOver,
+    mergePiece, hardDrop, softDrop, clearLines,
+    rotatePiece, movePiece, generateRandomQueue,
+    TICK_RATE_MS,
+} from "../../shared/tetris/index.js";
 
 export function createRng(seed) {
     return new seedrandom(seed);
@@ -8,44 +13,77 @@ export function createRng(seed) {
 export function step(state, rng) {
     let droppedState = softDrop(state);
 
-    if (droppedState === state) {
-        const mergedBoard = mergePiece(state.board, state.activePiece);
-        const { board: clearedBoard, clearedLines } = clearLines(mergedBoard);
-        const nextPieces = [...state.nextPieces];
-        if (nextPieces.length === 0) nextPieces.push(...generateRandomQueue(rng));
-        const nextType = nextPieces.shift();
-        const newState = {
+    if (droppedState !== state) return droppedState;
+
+    const mergedBoard = mergePiece(state.board, state.activePiece);
+    const { board: clearedBoard, clearedLines } = clearLines(mergedBoard);
+
+    const nextPieces = [...state.nextPieces];
+    if (nextPieces.length === 0) nextPieces.push(...generateRandomQueue(rng));
+    const nextType = nextPieces.shift();
+
+    const newState = {
+        ...state,
+        board: clearedBoard,
+        activePiece: createPiece({ type: nextType }),
+        nextPieces: nextPieces,
+    };
+    if (isGameOver(newState.board)) {
+        return {
             ...state,
             board: clearedBoard,
-            activePiece: createPiece({ type: nextType }),
-            nextPieces: nextPieces,
+            gameOver: true,
+            activePiece: null,
         };
-        if (isGameOver(newState.board)) {
-            return {
-                ...newState,
-                gameOver: true,
-                activePiece: null,
-            };
-        }
-        return newState;
     }
-    return droppedState;
+    return newState;
 }
 
 // ! add moves (input)
 // ! add last frame rotations 
 
-// export function gameLoop() {
-//     let activePiece = createPiece({ type: 'T' });
-//     let state = createGameState(activePiece);
-//     state.nextPieces = ['O', 'I', 'L', 'J', 'S', 'Z', 'T']; // test
+export function gameLoop() {
+    const rng = createRng("test-seed");
+    let state = createGameState();
+    state.nextPieces = generateRandomQueue(rng);
+    state.activePiece = createPiece({ type: state.nextPieces.shift() });
 
-//     const tick = setInterval(() => {
-//         state = step(state);
-//         console.log(state);
-//         if (state.gameOver) {
-//             console.log("Game Over");
-//             clearInterval(tick);
-//         }
-//     }, TICK_RATE_MS);
-// }
+    const tick = setInterval(() => {
+        state = step(state, rng);
+        // console.log("STATE", state); // ! EMIT GAME STATE HERE
+        if (state.gameOver) {
+            console.log("Game Over");
+            clearInterval(tick);
+        }
+    }, TICK_RATE_MS);
+
+    return {
+        getState: () => state,
+        stop: () => clearInterval(tick),
+    };
+}
+
+
+export function applyInput(state, input) {
+    let newState = state;
+
+    switch (input) {
+        case "left":
+            newState = movePiece(state, "left");
+            break;
+        case "right":
+            newState = movePiece(state, "right");
+            break;
+        case "rotate":
+            newState = rotatePiece(state);
+            break;
+        case "softDrop":
+            newState = softDrop(state);
+            break;
+        case "hardDrop":
+            newState = hardDrop(state);
+            break;
+        default:
+            break;
+    }
+}

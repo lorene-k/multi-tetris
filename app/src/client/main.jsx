@@ -7,6 +7,7 @@ import { Provider } from 'react-redux';
 import { storeStateMiddleWare } from './middleware/storeStateMiddleWare.js';
 import reducer from './reducers/index.js';
 import { alert } from './actions/alert.js';
+import { BrowserRouter } from "react-router";
 
 const store = configureStore({
     reducer,
@@ -17,7 +18,9 @@ const store = configureStore({
 createRoot(document.getElementById('root')).render(
     <StrictMode>
         <Provider store={store}>
-            <App />
+            <BrowserRouter>
+                <App />
+            </BrowserRouter>
         </Provider>
     </StrictMode>,
 )

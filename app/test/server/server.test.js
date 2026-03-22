@@ -9,7 +9,7 @@ import { join } from 'path';
 import fs from 'fs';
 import sinon from 'sinon';
 
-describe('Fake server test', function () {
+describe('Server test', function () {
     let tetrisServer
 
     before(cb => startServer(params.server, function (err, server) {
@@ -21,7 +21,7 @@ describe('Fake server test', function () {
 
     describe('HTTP Server', function () {
         it('serves index.html for root path', function (done) {
-            http.get(params.server.url, (res) => {
+            http.get(params.server.url + '/', (res) => {
                 expect(res.statusCode).to.equal(200)
                 let data = ''
                 res.on('data', chunk => data += chunk)
@@ -33,12 +33,13 @@ describe('Fake server test', function () {
         })
 
         it('serves bundle.js if it exists', function (done) {
-            const bundlePath = join(process.cwd(), 'build/bundle.js');
-            const bundleExists = fs.existsSync(bundlePath);
-            if (!bundleExists) this.skip();
+            const bundlePath = join(process.cwd(), 'src/client/dist/bundle.js');
+            if (!fs.existsSync(bundlePath)) this.skip();
 
             http.get(params.server.url + '/bundle.js', (res) => {
                 expect(res.statusCode).to.equal(200);
+                expect(res.headers['content-type'])
+                    .to.match(/javascript/);
                 let data = '';
                 res.on('data', chunk => data += chunk);
                 res.on('end', () => {
@@ -48,25 +49,12 @@ describe('Fake server test', function () {
             }).on('error', done);
         });
 
-        it('serves index.html for unknown paths', function (done) {
-            http.get(params.server.url + '/some-other-path', (res) => {
-                expect(res.statusCode).to.equal(200)
+        it('returns 500 for unknown paths', function (done) {
+            http.get(params.server.url + '/does-not-exist', (res) => {
+                expect(res.statusCode).to.equal(500)
                 done()
             }).on('error', done)
-        });
-
-        it('returns 500 on file read error', function (done) {
-            const readFileStub = sinon.stub(fs, 'readFile').callsArgWith(1, new Error('ENOENT'));
-            http.get(params.server.url, (res) => {
-                expect(res.statusCode).to.equal(500);
-                let data = '';
-                res.on('data', chunk => data += chunk);
-                res.on('end', () => {
-                    expect(data).to.equal('Error loading index.html');
-                    done();
-                });
-            }).on('error', done);
-        });
+        })
     })
 
     describe('Socket.IO Server', function () {

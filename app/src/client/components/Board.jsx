@@ -1,21 +1,20 @@
-// ! use grid or flexbox
+import "../style/Board.css";
 
-export function Board() {
+export function Board({ board }) {
     return (
-        <div className="board">
-            {
-        Array.from({ length: 20 })
-            .map((_, rowIndex) => (
-                <div key={rowIndex} className="board-row">
-                    {
-                Array.from({ length: 10 })
-                    .map((_, colIndex) => (
-                        <div key={colIndex} className="board-cell"></div>
-                    ))
-            }
-                </div>
-            ))
-        }
+        <div className="tetris-container">
+            <div className="board">
+                {board.map((row, y) => (
+                    <div key={y} className="board-row">
+                        {row.map((_, x) => (
+                            <div
+                                key={`${x}-${y}`}
+                                className="cell cell-empty"
+                            />
+                        ))}
+                    </div>
+                ))}
+            </div>
         </div>
-    )
+    );
 }
