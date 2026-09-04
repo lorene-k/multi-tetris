@@ -81,10 +81,10 @@ export function softDrop(state) {
     return movePiece(state, 'down');
 }
 
-export function addPenaltyLines(board, numLines) {
+export function addPenaltyLines(board, numLines, rng) {
     if (numLines <= 0) return board;
     const addedLines = Array.from({ length: numLines }, () => {
-        const holeIndex = Math.floor(Math.random() * BOARD_WIDTH);
+        const holeIndex = Math.floor(rng() * BOARD_WIDTH);
         return Array.from({ length: BOARD_WIDTH }, (_, x) => (x === holeIndex ? 0 : 1));
     });
 
