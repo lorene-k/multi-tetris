@@ -1,4 +1,4 @@
-import { createGameState, createPiece } from '../../shared/tetris/index.js';
+import { createGameState, createPiece, computeSpectrum } from '../../shared/tetris/index.js';
 
 /**
  * Player – server-side, OO/prototype-based.
@@ -11,6 +11,7 @@ function Player(socket, name, room) {
     this.state = createGameState();
     this.alive = false;
     this.pieceIdx = 0; // index into game.pieceQueue
+    this.groundedTicks = 0; // ticks the active piece has been unable to fall (lock-delay counter)
 }
 
 /**
@@ -19,6 +20,7 @@ function Player(socket, name, room) {
  */
 Player.prototype.initState = function (pieceQueue) {
     this.pieceIdx = 0;
+    this.groundedTicks = 0;
     const activePieceType = pieceQueue[this.pieceIdx];
     this.pieceIdx++;
     const nextPieces = pieceQueue.slice(this.pieceIdx, this.pieceIdx + 3);
@@ -48,14 +50,7 @@ Player.prototype.consumePiece = function (pieceQueue) {
 Player.prototype.getSpectrum = function () {
     const { board } = this.state;
     if (!board || !board.length) return [];
-    const height = board.length;
-    const width = board[0].length;
-    return Array.from({ length: width }, (_, col) => {
-        for (let row = 0; row < height; row++) {
-            if (board[row][col] !== 0) return height - row;
-        }
-        return 0;
-    });
+    return computeSpectrum(board);
 };
 
 /**

@@ -2,7 +2,7 @@ import seedrandom from 'seedrandom';
 import {
     createPiece, createGameState,
     softDrop, mergePiece, clearLines, addPenaltyLines,
-    isGameOver, TICK_RATE_MS,
+    isGameOver, TICK_RATE_MS, GRAVITY_TICKS,
     generateBag,
 } from '../../shared/tetris/index.js';
 import { applyInput } from '../game/gameLoop.js';
@@ -24,7 +24,7 @@ function Game(room) {
     this.io = null;
 }
 
-// ── Queue ──────────────────────────────────────────────────────────────────
+// -- Queue ------------------------------------------------------------------
 
 Game.prototype.ensureQueue = function (upTo) {
     const target = Math.max((upTo || 0) + QUEUE_MIN_AHEAD, QUEUE_MIN_AHEAD);
@@ -33,7 +33,7 @@ Game.prototype.ensureQueue = function (upTo) {
     }
 };
 
-// ── Player management ──────────────────────────────────────────────────────
+// -- Player management ------------------------------------------------------
 
 Game.prototype.addPlayer = function (player) {
     if (!this.host) this.host = player;
@@ -55,7 +55,7 @@ Game.prototype.isEmpty = function () {
     return this.players.length === 0;
 };
 
-// ── Lifecycle ──────────────────────────────────────────────────────────────
+// -- Lifecycle --------------------------------------------------------------
 
 Game.prototype.start = function (io) {
     this.io = io;
@@ -92,7 +92,7 @@ Game.prototype.reset = function (io) {
     this.start(io);
 };
 
-// ── Tick ───────────────────────────────────────────────────────────────────
+// -- Tick -------------------------------------------------------------------
 
 Game.prototype.tick = function () {
     let anyAlive = false;
@@ -112,7 +112,7 @@ Game.prototype.tick = function () {
     if (anyAlive) this.broadcastSpectrums();
 };
 
-// ── Input ──────────────────────────────────────────────────────────────────
+// -- Input ------------------------------------------------------------------
 
 Game.prototype.handleInput = function (player, input) {
     if (!player.alive || !player.state.activePiece) return;
@@ -138,6 +138,7 @@ Game.prototype.handleInput = function (player, input) {
         }
 
         this.ensureQueue(player.pieceIdx + 10);
+        player.groundedTicks = 0;
         const { nextType, nextPieces } = player.consumePiece(this.pieceQueue);
         player.state = {
             ...newState,
@@ -148,20 +149,30 @@ Game.prototype.handleInput = function (player, input) {
         if (clearedLines > 0) this._penalise(player, clearedLines);
     } else {
         player.state = newState;
+        player.groundedTicks = 0;
     }
 
     player.emit('state_update', sanitise(player.state, emitLines));
     this.broadcastSpectrums();
 };
 
-// ── Gravity (lock piece when it can't fall) ────────────────────────────────
+// -- Gravity (lock piece when it can't fall) --------------------------------
 
 Game.prototype._gravity = function (player) {
     const dropped = softDrop(player.state);
     if (dropped !== player.state) {
         player.state = dropped;
+        player.groundedTicks = 0;
         return { clearedLines: 0 };
     }
+
+    // Lock-delay: give a grounded piece extra ticks before it locks,
+    // so a last-moment move/rotate can still save it.
+    if (player.groundedTicks < GRAVITY_TICKS) {
+        player.groundedTicks++;
+        return { clearedLines: 0 };
+    }
+
     return this._lock(player);
 };
 
@@ -184,23 +195,24 @@ Game.prototype._lock = function (player) {
         activePiece: createPiece({ type: nextType }),
         nextPieces,
     };
+    player.groundedTicks = 0;
 
     return { clearedLines };
 };
 
-// ── Penalty lines ──────────────────────────────────────────────────────────
+// -- Penalty lines ----------------------------------------------------------
 
 Game.prototype._penalise = function (source, clearedLines) {
     const count = clearedLines - 1;
     if (count <= 0) return;
     for (const opp of this.players) {
         if (opp === source || !opp.alive) continue;
-        opp.state = { ...opp.state, board: addPenaltyLines(opp.state.board, count) };
+        opp.state = { ...opp.state, board: addPenaltyLines(opp.state.board, count, this.rng) };
         opp.emit('state_update', sanitise(opp.state));
     }
 };
 
-// ── End detection ──────────────────────────────────────────────────────────
+// -- End detection ----------------------------------------------------------
 
 Game.prototype._checkEnd = function () {
     const alive = this.players.filter(p => p.alive);
@@ -214,7 +226,7 @@ Game.prototype._checkEnd = function () {
     if (this.io) this.io.to(this.room).emit('game_over', { winner });
 };
 
-// ── Spectrums ──────────────────────────────────────────────────────────────
+// -- Spectrums --------------------------------------------------------------
 
 Game.prototype.broadcastSpectrums = function () {
     if (!this.io) return;
@@ -224,7 +236,7 @@ Game.prototype.broadcastSpectrums = function () {
     }
 };
 
-// ── Private helper ─────────────────────────────────────────────────────────
+// -- Private helper ---------------------------------------------------------
 
 function sanitise(state, linesCleared = 0) {
     const { board, activePiece, nextPieces, gameOver } = state;
