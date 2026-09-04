@@ -1,0 +1,111 @@
+/* Home.css — MULTITETRIS neon dark theme */
+
+.home-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    gap: 20px;
+    padding: 10px 20px;
+}
+
+/* ── Title ──────────────────────────────────────────────────────────── */
+.home-title {
+    font-size: clamp(2.2rem, 6vw, 3.6rem);
+    font-weight: 900;
+    margin: 0;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    /* background: linear-gradient(135deg, #00ffcc 0%, #00ccff 50%, #c455ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text; */
+    color: var(--teal);
+    filter: drop-shadow(0 0/ 22px rgba(0, 255, 204, 0.5));
+}
+
+.home-subtitle {
+    color: var(--text-muted);
+    margin: 0;
+    font-size: 0.9rem;
+    letter-spacing: 0.06em;
+}
+
+/* ── Card ───────────────────────────────────────────────────────────── */
+.home-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 300px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px 24px;
+    box-shadow:
+        0 8px 40px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(0, 255, 204, 0.06);
+}
+
+/* ── Inputs ─────────────────────────────────────────────────────────── */
+.text-input {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 0.95rem;
+    font-family: var(--font);
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.18s, box-shadow 0.18s;
+}
+
+.text-input::placeholder {
+    color: var(--text-faint);
+}
+
+.text-input:focus {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 2px var(--teal-glow);
+}
+
+/* ── Play button: override global button with teal fill ─────────────── */
+.play-button {
+    width: 100%;
+    padding: 13px;
+    font-size: 0.9rem;
+    background: var(--teal-glow);
+    color: var(--teal);
+    border-color: var(--teal);
+    box-shadow: 0 0 16px var(--teal-glow);
+}
+
+.play-button:hover {
+    background: rgba(0, 255, 204, 0.35);
+    box-shadow: 0 0 28px var(--teal-glow), 0 0 4px var(--teal);
+}
+
+/* ── Misc ───────────────────────────────────────────────────────────── */
+.error {
+    color: var(--purple);
+    font-size: 0.82rem;
+    margin: 0;
+    text-align: center;
+}
+
+.home-hint {
+    color: var(--text-faint);
+    font-size: 0.78rem;
+    margin: 0;
+}
+
+.home-hint code {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1px 6px;
+    border-radius: 4px;
+    color: var(--teal-dim);
+    font-family: monospace;
+}

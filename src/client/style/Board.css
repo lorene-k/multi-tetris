@@ -1,0 +1,126 @@
+/* Board.css — neon dark theme */
+
+.tetris-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.board {
+    display: inline-flex;
+    flex-direction: column;
+    background: var(--surface);
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border-hi);
+    box-shadow:
+        0 0 40px rgba(0, 0, 0, 0.6),
+        0 0 20px var(--teal-glow),
+        inset 0 0 30px rgba(0, 0, 0, 0.3);
+    gap: 2px;
+}
+
+.board-row {
+    display: flex;
+    gap: 2px;
+}
+
+.cell {
+    width: 28px;
+    height: 28px;
+    border-radius: 3px;
+    position: relative;
+}
+
+.cell-inner {
+    width: 100%;
+    height: 100%;
+    border-radius: 2px;
+    position: relative;
+}
+
+.cell-empty {
+    background: rgba(255, 255, 255, 0.025);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+}
+
+/* I — neon cyan */
+.cell-cyan {
+    background: linear-gradient(135deg, #00ffff 0%, #00ccdd 100%);
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.35),
+        0 0 8px rgba(0, 255, 255, 0.55),
+        0 0 2px rgba(0, 255, 255, 0.9);
+}
+
+/* O — neon yellow */
+.cell-yellow {
+    background: linear-gradient(135deg, #ffee00 0%, #ddcc00 100%);
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.35),
+        0 0 8px rgba(255, 238, 0, 0.55),
+        0 0 2px rgba(255, 238, 0, 0.9);
+}
+
+/* T — neon purple */
+.cell-purple {
+    background: linear-gradient(135deg, #cc44ff 0%, #a020cc 100%);
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.35),
+        0 0 8px rgba(196, 68, 255, 0.55),
+        0 0 2px rgba(196, 68, 255, 0.9);
+}
+
+/* J — neon blue */
+.cell-blue {
+    background: linear-gradient(135deg, #2277ff 0%, #0044cc 100%);
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.35),
+        0 0 8px rgba(34, 119, 255, 0.55),
+        0 0 2px rgba(34, 119, 255, 0.9);
+}
+
+/* L — neon orange */
+.cell-orange {
+    background: linear-gradient(135deg, #ff8800 0%, #cc5500 100%);
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.35),
+        0 0 8px rgba(255, 136, 0, 0.55),
+        0 0 2px rgba(255, 136, 0, 0.9);
+}
+
+/* S — neon green */
+.cell-green {
+    background: linear-gradient(135deg, #00ff66 0%, #00bb44 100%);
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.35),
+        0 0 8px rgba(0, 255, 102, 0.55),
+        0 0 2px rgba(0, 255, 102, 0.9);
+}
+
+/* Z — neon pink/red */
+.cell-red {
+    background: linear-gradient(135deg, #ff2255 0%, #cc0033 100%);
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.35),
+        0 0 8px rgba(255, 34, 85, 0.55),
+        0 0 2px rgba(255, 34, 85, 0.9);
+}
+
+/* Penalty lines — dim grey */
+.cell-grey {
+    background: linear-gradient(135deg, #5a5a6a 0%, #3a3a4a 100%);
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.1),
+        0 0 4px rgba(90, 90, 110, 0.4);
+}
+
+@media (max-width: 900px) {
+    .cell { width: 24px; height: 24px; }
+    .board { padding: 8px; }
+}
+
+@media (max-width: 480px) {
+    .cell { width: 20px; height: 20px; }
+    .board { padding: 6px; }
+}
