@@ -1,5 +1,3 @@
-/* NextPiece.css — neon dark theme */
-
 .next-piece {
     display: flex;
     flex-direction: column;
@@ -37,7 +35,7 @@
     border-radius: 2px;
 }
 
-/* Reuse the same neon glow classes as the board */
+/* Same neon glow classes as board */
 .next-piece-cell.cell-empty {
     background: rgba(255,255,255,0.025);
 }

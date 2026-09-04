@@ -36,7 +36,7 @@ export const initEngine = (io) => {
                     return;
                 }
                 if (game.players.some(p => p.name === playerName)) {
-                    callback({ ok: false, message: 'That username is already taken in this room.' });
+                    callback({ ok: false, message: 'Username is already taken in this room.' });
                     return;
                 }
             }
@@ -47,7 +47,7 @@ export const initEngine = (io) => {
         // Join a game room 
         socket.on('join_game', ({ room, playerName }) => {
             if (!room || !playerName) {
-                socket.emit('error', { message: 'room and playerName are required' });
+                socket.emit('error', { message: 'room and username are required' });
                 return;
             }
 

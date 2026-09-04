@@ -75,9 +75,9 @@ export default function Home() {
                 {error && <p className="error">{error}</p>}
             </div>
 
-            {/* <p className="home-hint">
+            <p className="home-hint">
                 Or join directly: <code>/room/yourname</code>
-            </p> */}
+            </p>
         </div>
     );
 }

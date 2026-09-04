@@ -1,0 +1,6 @@
+.error {
+    color: var(--purple);
+    font-size: 0.82rem;
+    margin: 0;
+    text-align: center;
+}

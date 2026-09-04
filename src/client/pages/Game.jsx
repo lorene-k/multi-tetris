@@ -37,7 +37,7 @@ export default function Game() {
     return (
         <div className="game-page">
 
-            {/* LEFT: score + room info + controls */}
+            {/* Left: score + room info + controls */}
             <div className="game-left">
                 <div className="score-panel">
                     <div className="score-block">
@@ -63,7 +63,7 @@ export default function Game() {
                 </div>
             </div>
 
-            {/* CENTRE: board + overlay */}
+            {/* Centre: board + overlay */}
             <div className="game-centre">
                 <div className="board-wrapper">
                     <Board board={board} activePiece={activePiece} />
@@ -74,10 +74,10 @@ export default function Game() {
                         <GameOverOverlay winner={winner} isHost={isHost} onRestart={handleRestart} onHome={handleHome} />
                     )}
                 </div>
-                {connError && <p className="game-error">{connError}</p>}
+                {connError && <p className="error">{connError}</p>}
             </div>
 
-            {/* RIGHT: next piece + opponent spectrums */}
+            {/* Right: next piece + opponent spectrums */}
             <div className="game-right">
                 <div className="next-panel">
                     <span className="next-panel-label">Next</span>
