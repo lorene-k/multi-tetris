@@ -5,7 +5,7 @@ let _socket = null;
 export const getSocket = () => _socket;
 
 export const connectSocket = (dispatch) => {
-    if (_socket && _socket.connected) return _socket;
+    if (_socket) return _socket;
 
     _socket = io(window.location.origin, { autoConnect: false });
 
@@ -64,6 +64,26 @@ export const emit = (event, data) => {
 
 export const joinGame = (room, playerName) => {
     emit('join_game', { room, playerName });
+};
+
+// Read-only pre-check used by Home before navigating to the game page
+// Does not add a player, just reports whether room + playerName is joinable
+export const checkJoin = (room, playerName) => {
+    return new Promise((resolve) => {
+        if (!_socket) {
+            resolve({ ok: false, message: 'Not connected to the server.' });
+            return;
+        }
+
+        const timeout = setTimeout(() => {
+            resolve({ ok: false, message: 'Server did not respond, try again.' });
+        }, 5000);
+
+        _socket.emit('check_join', { room, playerName }, (response) => {
+            clearTimeout(timeout);
+            resolve(response);
+        });
+    });
 };
 
 export const startGame = () => {
