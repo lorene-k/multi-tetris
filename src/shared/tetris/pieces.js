@@ -68,7 +68,6 @@ export const PIECES = {
 
 export const PIECE_TYPES = Object.keys(PIECES);
 
-// Fixed: pass pivot correctly so rotations work
 export function getPieceShape(piece) {
     const { shape, pivot } = PIECES[piece.type];
     return rotateN(shape, pivot, piece.rotation);
