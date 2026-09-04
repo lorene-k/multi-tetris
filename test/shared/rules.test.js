@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import seedrandom from 'seedrandom';
 import {
     BOARD_WIDTH, BOARD_HEIGHT, createEmptyBoard,
     canPlacePiece, mergePiece, clearLines, isGameOver,
@@ -191,11 +192,14 @@ describe('rules.js', () => {
     });
 
     describe('addPenaltyLines', () => {
-        let board;
-        beforeEach(() => { board = createEmptyBoard(); });
+        let board, rng;
+        beforeEach(() => {
+            board = createEmptyBoard();
+            rng = seedrandom('test-seed');
+        });
 
         it('adds 2 penalty lines at the bottom', () => {
-            const newBoard = addPenaltyLines(board, 2);
+            const newBoard = addPenaltyLines(board, 2, rng);
             expect(newBoard).to.have.lengthOf(BOARD_HEIGHT);
             const bottom = newBoard.slice(-2);
             bottom.forEach(row => {
@@ -207,19 +211,19 @@ describe('rules.js', () => {
 
         it('does not modify the original board', () => {
             const copy = JSON.parse(JSON.stringify(board));
-            addPenaltyLines(board, 2);
+            addPenaltyLines(board, 2, rng);
             expect(board).to.deep.equal(copy);
         });
 
         it('returns same board when numLines is 0', () => {
-            const result = addPenaltyLines(board, 0);
+            const result = addPenaltyLines(board, 0, rng);
             expect(result).to.equal(board);
         });
 
         it('shifts existing rows up by numLines', () => {
             const b = createEmptyBoard();
             b[19][0] = 'T';
-            const newBoard = addPenaltyLines(b, 1);
+            const newBoard = addPenaltyLines(b, 1, rng);
             expect(newBoard[18][0]).to.equal('T');
         });
     });
