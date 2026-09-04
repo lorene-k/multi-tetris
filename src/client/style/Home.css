@@ -10,17 +10,13 @@
     padding: 10px 20px;
 }
 
-/* ── Title ──────────────────────────────────────────────────────────── */
+/* -- Title ------------------------------------------------------------ */
 .home-title {
     font-size: clamp(2.2rem, 6vw, 3.6rem);
     font-weight: 900;
     margin: 0;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    /* background: linear-gradient(135deg, #00ffcc 0%, #00ccff 50%, #c455ff 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text; */
     color: var(--teal);
     filter: drop-shadow(0 0/ 22px rgba(0, 255, 204, 0.5));
 }
@@ -28,11 +24,11 @@
 .home-subtitle {
     color: var(--text-muted);
     margin: 0;
-    font-size: 0.9rem;
+    font-size: 01.2rem;
     letter-spacing: 0.06em;
 }
 
-/* ── Card ───────────────────────────────────────────────────────────── */
+/* -- Card ------------------------------------------------------------- */
 .home-card {
     display: flex;
     flex-direction: column;
@@ -47,7 +43,7 @@
         0 0 0 1px rgba(0, 255, 204, 0.06);
 }
 
-/* ── Inputs ─────────────────────────────────────────────────────────── */
+/* -- Inputs ----------------------------------------------------------- */
 .text-input {
     width: 100%;
     padding: 11px 14px;
@@ -71,7 +67,7 @@
     box-shadow: 0 0 0 2px var(--teal-glow);
 }
 
-/* ── Play button: override global button with teal fill ─────────────── */
+/* -- Play button: override global button with teal fill --------------- */
 .play-button {
     width: 100%;
     padding: 13px;
@@ -87,7 +83,7 @@
     box-shadow: 0 0 28px var(--teal-glow), 0 0 4px var(--teal);
 }
 
-/* ── Misc ───────────────────────────────────────────────────────────── */
+/* -- Misc ------------------------------------------------------------- */
 .error {
     color: var(--purple);
     font-size: 0.82rem;

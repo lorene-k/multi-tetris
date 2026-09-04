@@ -11,14 +11,14 @@ export const initEngine = (io) => {
         let currentPlayer = null;
         let currentGame = null;
 
-        // ── Backward-compat ping/pong ──
+        // Backward-compat ping/pong 
         socket.on('action', (action) => {
             if (action && action.type === 'server/ping') {
                 socket.emit('action', { type: 'pong' });
             }
         });
 
-        // ── Read-only pre-check for the Home screen ──
+        // Read-only pre-check for the Home screen 
         // Reports whether room+playerName would be joinable, without creating
         // a room or adding a player as a side effect.
         socket.on('check_join', ({ room, playerName }, callback) => {
@@ -44,7 +44,7 @@ export const initEngine = (io) => {
             callback({ ok: true });
         });
 
-        // ── Join a game room ──
+        // Join a game room 
         socket.on('join_game', ({ room, playerName }) => {
             if (!room || !playerName) {
                 socket.emit('error', { message: 'room and playerName are required' });
@@ -60,7 +60,7 @@ export const initEngine = (io) => {
 
             // Prevent duplicate names in the same room
             if (game.players.some(p => p.name === playerName)) {
-                socket.emit('error', { message: 'That username is already taken in this room.' });
+                socket.emit('error', { message: 'Username is already taken in this room.' });
                 return;
             }
 
@@ -90,7 +90,7 @@ export const initEngine = (io) => {
             loginfo(`${playerName} joined room ${room}`);
         });
 
-        // ── Host starts the game ──
+        // Host starts the game 
         socket.on('start_game', () => {
             if (!currentGame || !currentPlayer) return;
             if (currentPlayer !== currentGame.host) {
@@ -106,7 +106,7 @@ export const initEngine = (io) => {
             loginfo(`Game started in room ${currentGame.room}`);
         });
 
-        // ── Host restarts the game ──
+        // Host restarts the game 
         socket.on('restart_game', () => {
             if (!currentGame || !currentPlayer) return;
             if (currentPlayer !== currentGame.host) {
@@ -117,14 +117,14 @@ export const initEngine = (io) => {
             loginfo(`Game restarted in room ${currentGame.room}`);
         });
 
-        // ── Player input ──
+        // Player input 
         socket.on('player_input', ({ input }) => {
             if (!currentGame || !currentPlayer) return;
             if (!currentGame.started) return;
             currentGame.handleInput(currentPlayer, input);
         });
 
-        // ── Disconnect ──
+        // Disconnect 
         socket.on('disconnect', () => {
             loginfo('Socket disconnected: ' + socket.id);
             if (!currentGame || !currentPlayer) return;
@@ -132,15 +132,14 @@ export const initEngine = (io) => {
             const wasStarted = currentGame.started;
             currentGame.removePlayer(socket.id);
 
-            // Tell others
+            // Emit player left
             io.to(currentGame.room).emit('player_left', {
                 playerName: currentPlayer.name,
                 players: currentGame.players.map(p => ({ name: p.name, isHost: p === currentGame.host })),
             });
 
-            // If someone disconnects during a game, check if it ends
+            // Check if game ends when user disconnects during game
             if (wasStarted) {
-                // Mark player as dead
                 currentPlayer.alive = false;
                 currentGame._checkEnd && currentGame._checkEnd();
             }

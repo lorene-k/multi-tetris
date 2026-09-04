@@ -1,6 +1,6 @@
 /* Game.css — neon dark theme, 3-column responsive layout */
 
-/* ── Page shell ─────────────────────────────────────────────────────── */
+/* -- Page shell ------------------------------------------------------- */
 .game-page {
     display: grid;
     grid-template-columns: 200px auto 200px;
@@ -13,7 +13,7 @@
     box-sizing: border-box;
 }
 
-/* ── LEFT panel: score + info + controls ────────────────────────────── */
+/* -- LEFT panel: score + info + controls ------------------------------ */
 .game-left {
     grid-area: left;
     display: flex;
@@ -98,7 +98,7 @@
     font-size: 0.68rem;
 }
 
-/* ── CENTRE: board + overlay ─────────────────────────────────────────── */
+/* -- CENTRE: board + overlay ------------------------------------------- */
 .game-centre {
     grid-area: centre;
     display: flex;
@@ -165,7 +165,7 @@
     text-align: center;
 }
 
-/* ── RIGHT panel: next piece + spectrums ─────────────────────────────── */
+/* -- RIGHT panel: next piece + spectrums ------------------------------- */
 .game-right {
     grid-area: right;
     display: flex;
@@ -208,7 +208,7 @@
     margin: 0;
 }
 
-/* ── Responsive ──────────────────────────────────────────────────────── */
+/* -- Responsive -------------------------------------------------------- */
 @media (max-width: 900px) {
     .game-page {
         grid-template-columns: 1fr;

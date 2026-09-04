@@ -1,4 +1,4 @@
-/* ── Design tokens ─────────────────────────────────────────────────── */
+/* -- Design tokens --------------------------------------------------- */
 :root {
     --bg:          #06060f;
     --surface:     #0d0d1f;
@@ -20,7 +20,7 @@
     --font: 'Inter', 'Segoe UI', system-ui, sans-serif;
 }
 
-/* ── Reset ─────────────────────────────────────────────────────────── */
+/* -- Reset ----------------------------------------------------------- */
 *, *::before, *::after { box-sizing: border-box; }
 
 html {
@@ -47,7 +47,7 @@ body {
     flex-direction: column;
 }
 
-/* ── Global button ─────────────────────────────────────────────────── */
+/* -- Global button --------------------------------------------------- */
 button {
     font-family: var(--font);
     font-size: 0.85rem;
@@ -79,7 +79,7 @@ button.btn-purple:hover {
     box-shadow: 0 0 16px var(--purple-glow), 0 0 2px var(--purple);
 }
 
-/* ── Scrollbar ─────────────────────────────────────────────────────── */
+/* -- Scrollbar ------------------------------------------------------- */
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: var(--surface); }
 ::-webkit-scrollbar-thumb { background: var(--text-faint); border-radius: 3px; }
