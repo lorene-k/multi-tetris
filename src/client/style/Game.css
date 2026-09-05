@@ -244,6 +244,27 @@
     }
 }
 
+/* Below this width there's no room for 2 columns either - stack
+   everything, board first, panels underneath. */
+@media (max-width: 740px) {
+    .game-body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        overflow-x: visible;
+    }
+
+    .game-centre {
+        order: -1;
+    }
+
+    .game-left,
+    .game-right {
+        width: 100%;
+        max-width: 320px;
+    }
+}
+
 @media (max-width: 480px) {
     .game-page { padding: 10px; gap: 12px; }
 }
