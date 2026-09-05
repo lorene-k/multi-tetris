@@ -72,7 +72,7 @@ Game.prototype.start = function (io) {
         player.emit('game_started', {
             players: this.players.map(p => ({ name: p.name, isHost: p === this.host })),
         });
-        player.emit('state_update', sanitise(player.state));
+        player.emit('state_update', { ...player.state, linesCleared: 0 });
     }
 
     this.broadcastSpectrums();
@@ -103,7 +103,7 @@ Game.prototype.tick = function () {
 
         const result = this._gravity(player);
         if (result !== null) {
-            player.emit('state_update', sanitise(player.state, result.clearedLines));
+            player.emit('state_update', { ...player.state, linesCleared: result.clearedLines });
             if (result.clearedLines > 0) this._penalise(player, result.clearedLines);
             if (player.state.gameOver) this._checkEnd();
         }
@@ -130,7 +130,7 @@ Game.prototype.handleInput = function (player, input) {
         if (isGameOver(clearedBoard)) {
             player.alive = false;
             player.state = { ...newState, board: clearedBoard, gameOver: true };
-            player.emit('state_update', sanitise(player.state, clearedLines));
+            player.emit('state_update', { ...player.state, linesCleared: clearedLines });
             if (clearedLines > 0) this._penalise(player, clearedLines);
             this._checkEnd();
             this.broadcastSpectrums();
@@ -152,7 +152,7 @@ Game.prototype.handleInput = function (player, input) {
         player.groundedTicks = 0;
     }
 
-    player.emit('state_update', sanitise(player.state, emitLines));
+    player.emit('state_update', { ...player.state, linesCleared: emitLines });
     this.broadcastSpectrums();
 };
 
@@ -208,16 +208,16 @@ Game.prototype._penalise = function (source, clearedLines) {
     for (const opp of this.players) {
         if (opp === source || !opp.alive) continue;
         opp.state = { ...opp.state, board: addPenaltyLines(opp.state.board, count, this.rng) };
-        opp.emit('state_update', sanitise(opp.state));
+        opp.emit('state_update', { ...opp.state, linesCleared: 0 });
     }
 };
 
 // -- End detection ----------------------------------------------------------
 
+// Multi-player: game ends when ≤1 alive
+// Solo: game ends when player is dead
 Game.prototype._checkEnd = function () {
     const alive = this.players.filter(p => p.alive);
-    // Multi-player: game ends when ≤1 alive
-    // Solo: game ends when player is dead
     if (this.players.length > 1 && alive.length > 1) return;
     if (this.players.length === 1 && alive.length === 1) return;
 
@@ -235,12 +235,5 @@ Game.prototype.broadcastSpectrums = function () {
         player.emit('opponents_update', all.filter(s => s.name !== player.name));
     }
 };
-
-// -- Private helper ---------------------------------------------------------
-
-function sanitise(state, linesCleared = 0) {
-    const { board, activePiece, nextPieces, gameOver } = state;
-    return { board, activePiece, nextPieces, gameOver, linesCleared };
-}
 
 export default Game;
