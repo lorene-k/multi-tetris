@@ -4,10 +4,10 @@ An online multiplayer Tetris game built in Javascript, with Node.js & socket.io 
 
 ## Stack
 
-- **Server** — Node.js, socket.io, prototype-based OOP (`Player`, `Piece`, `Game`)
-- **Client** — React 18, Redux Toolkit, React Router, socket.io-client (no `this`, no Canvas/SVG/jQuery)
-- **Shared** — pure, immutable Tetris engine (board, pieces, rules, rotations)
-- **Tests** — Mocha, Chai, Sinon · **92%+ coverage** across statements, branches, functions, and lines
+- **Server** : Node.js, socket.io, prototype-based OOP (`Player`, `Piece`, `Game`)
+- **Client** : React 18, Redux Toolkit, React Router, socket.io-client (no `this`, no Canvas/SVG/jQuery)
+- **Shared** : pure, immutable Tetris engine (board, pieces, rules, rotations)
+- **Tests** : Mocha, Chai, Sinon · **92%+ coverage** across statements, branches, functions, and lines
 
 ## Usage
 

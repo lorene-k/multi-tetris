@@ -2,8 +2,7 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { connectSocket, joinGame } from '../socket/socket.js';
 
-// Connects the socket, registers this player's name/room, and joins the
-// game room once connected. Returns the current connection state.
+// Connects the socket, registers this player's name/room, and joins the game room once connected
 export function useGameConnection(room, player) {
     const dispatch = useDispatch();
     const connected = useSelector(s => s.connection.connected);

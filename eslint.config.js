@@ -44,7 +44,7 @@ export default [
                 'error',
                 {
                     selector: 'ThisExpression',
-                    message: 'Client-side code must be functional — avoid `this` (project subject, General Instructions).',
+                    message: 'Client-side code must be functional : remove `this` keyword.',
                 },
             ],
         },
