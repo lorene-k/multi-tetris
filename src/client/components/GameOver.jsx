@@ -1,4 +1,4 @@
-export function GameOverOverlay({ winner, isHost, onRestart, onHome }) {
+export function GameOver({ winner, isHost, onRestart, onHome }) {
     return (
         <div className="overlay">
             <h2 className={winner ? 'winner-text' : ''}>

@@ -1,7 +1,7 @@
-export function LobbyOverlay({ room, lobbyPlayers, isHost, onStart }) {
+export function Lobby({ lobbyPlayers, isHost, onStart }) {
     return (
         <div className="overlay">
-            <h2>Lobby - {room}</h2>
+            <h2>Waiting for players...</h2>
             <ul className="lobby-players">
                 {lobbyPlayers.map(p => (
                     <li key={p.name} className={p.isHost ? 'is-host' : ''}>
