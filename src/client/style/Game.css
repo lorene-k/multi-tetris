@@ -1,30 +1,59 @@
-/* -- Page shell ------------------------------------------------------- */
+/* Game page layout : header on top, 3 columns underneath */
 .game-page {
-    display: grid;
-    grid-template-columns: 200px auto 200px;
-    grid-template-areas: "left centre right";
-    align-items: start;
-    justify-content: center;
-    gap: 24px;
-    padding: 24px 20px;
-    min-height: 100vh;
-    box-sizing: border-box;
-}
-
-/* -- Left panel: score + info + controls ------------------------------ */
-.game-left {
-    grid-area: left;
     display: flex;
     flex-direction: column;
+    width: 100%;
+    height: 100vh;
+    box-sizing: border-box;
+    padding: 3vh 3vw;
     gap: 20px;
-    padding-top: 4px;
+}
+
+/* Header */
+.game-header {
+    flex-shrink: 0;
+}
+
+.game-title {
+    margin: 5px;
+    text-align: center;
+    font-size: clamp(1.7rem, 2.6vw, 2.6rem);
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--teal);
+    text-shadow: 0 0 22px var(--teal-glow);
+}
+
+/* Body */
+.game-body {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 32px;
+    flex: 1;
+    min-height: 0;
+}
+
+/* Left & right columns */
+.game-left,
+.game-right {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    width: 220px;
+    flex-shrink: 0;
+}
+
+/* Subpanels */
+.score-panel,
+.info-panel,
+.controls-panel {
+    width: 200px;
 }
 
 .score-panel {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 14px 16px;
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -36,16 +65,8 @@
     gap: 2px;
 }
 
-.score-label {
-    font-size: 0.62rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    font-weight: 700;
-}
-
 .score-value {
-    font-size: 1.6rem;
+    font-size: 1.8rem;
     font-weight: 900;
     color: var(--teal);
     text-shadow: 0 0 12px var(--teal-glow);
@@ -58,51 +79,57 @@
     text-shadow: 0 0 12px var(--purple-glow);
 }
 
-.info-panel {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 12px 14px;
-    font-size: 0.78rem;
-    color: var(--text-muted);
-    line-height: 1.7;
-}
-
-.info-panel p { margin: 0; }
-.info-panel strong { color: var(--text); }
-
-.controls-panel {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 12px 14px;
-    font-size: 0.72rem;
-    color: var(--text-faint);
-    line-height: 2;
+/* Info & controls */
+.info-row,
+.control-row {
     display: flex;
-    flex-direction: column;
-    gap: 8px;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0;
 }
 
-.controls-panel p { margin: 0; }
+.info-row + .info-row,
+.control-row + .control-row {
+    margin-top: 8px;
+}
+
+.info-label {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.info-value {
+    color: var(--text);
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.control-name {
+    color: var(--text-faint);
+    font-size: 0.8rem;
+}
+
 .controls-panel .key {
     display: inline-block;
     background: var(--surface);
     border: 1px solid var(--border-hi);
     border-radius: 3px;
-    padding: 0 5px;
+    padding: 1px 6px;
     font-family: monospace;
     color: var(--teal);
-    font-size: 0.68rem;
+    font-size: 0.75rem;
 }
 
-/* -- CENTRE: board + overlay ------------------------------------------- */
+/* Centre panel */
 .game-centre {
-    grid-area: centre;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: flex-start;
     gap: 12px;
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
     position: relative;
 }
 
@@ -127,7 +154,7 @@
 
 .overlay h2 {
     color: var(--teal);
-    font-size: 1.5rem;
+    font-size: 1.7rem;
     margin: 0;
     text-align: center;
     text-shadow: 0 0 18px var(--teal-glow);
@@ -143,7 +170,7 @@
     list-style: none;
     padding: 0;
     margin: 0;
-    font-size: 0.9rem;
+    font-size: 1rem;
     text-align: center;
 }
 
@@ -156,89 +183,67 @@
     color: var(--teal);
 }
 
-.error {
-    color: var(--purple);
-    font-size: 0.9rem;
-    margin: 0;
-    text-align: center;
-}
-
-/* -- RIGHT panel: next piece + spectrums ------------------------------- */
-.game-right {
-    grid-area: right;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    padding-top: 4px;
-}
-
+/* Next piece */
 .next-panel {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 12px 14px;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 8px;
-}
-
-.next-panel-label {
-    font-size: 0.62rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    font-weight: 700;
+    width: 200px;
+    height: 170px;
 }
 
 .opponents-panel {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    width: 200px;
 }
 
 .opponents-title {
-    font-size: 0.62rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    font-weight: 700;
     margin: 0;
 }
 
-/* -- Responsive -------------------------------------------------------- */
+/* Responsive */
 @media (max-width: 900px) {
     .game-page {
-        grid-template-columns: 1fr;
-        grid-template-areas:
-            "centre"
-            "left"
-            "right";
+        height: auto;
+        min-height: 100vh;
+        padding: 16px;
         gap: 16px;
-        padding: 12px;
     }
+
+    /* 2 columns - left/right panels stacked together on the left */
+    .game-body {
+        display: grid;
+        grid-template-columns: 150px 1fr;
+        grid-template-areas:
+            "left   centre"
+            "right  centre";
+        align-items: start;
+        gap: 16px;
+        overflow-x: auto;
+    }
+
+    .game-left  { grid-area: left; }
+    .game-right { grid-area: right; }
+    .game-centre { grid-area: centre; }
 
     .game-left,
     .game-right {
-        flex-direction: row;
-        flex-wrap: wrap;
-        gap: 12px;
+        width: 150px;
     }
 
     .score-panel,
     .info-panel,
     .controls-panel,
-    .next-panel {
-        flex: 1 1 140px;
-    }
-
+    .next-panel,
     .opponents-panel {
-        flex-direction: row;
-        flex-wrap: wrap;
-        gap: 10px;
+        width: 100%;
     }
 }
 
 @media (max-width: 480px) {
-    .game-page { padding: 8px; gap: 10px; }
+    .game-page { padding: 10px; gap: 12px; }
 }

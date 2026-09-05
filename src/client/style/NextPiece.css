@@ -5,23 +5,11 @@
     gap: 6px;
 }
 
-.next-piece-label {
-    font-size: 0.62rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    font-weight: 700;
-}
-
 .next-piece-grid {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 8px;
+    padding: 10px;
     display: inline-flex;
     flex-direction: column;
     gap: 2px;
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
 }
 
 .next-piece-row {
@@ -30,8 +18,8 @@
 }
 
 .next-piece-cell {
-    width: 18px;
-    height: 18px;
+    width: 22px;
+    height: 22px;
     border-radius: 2px;
 }
 
