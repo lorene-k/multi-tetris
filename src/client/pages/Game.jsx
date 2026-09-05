@@ -1,7 +1,6 @@
 import { useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Board } from '../components/Board.jsx';
-import { Spectrum } from '../components/Spectrum.jsx';
 import { Lobby } from '../components/Lobby.jsx';
 import { GameOver } from '../components/GameOver.jsx';
 import { useGameConnection } from '../hooks/useGameConnection.js';

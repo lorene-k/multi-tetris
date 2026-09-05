@@ -1,4 +1,5 @@
 import { NextPiece } from './NextPiece.jsx';
+import { Spectrum } from './Spectrum.jsx';
 
 export function RightPanel({ nextPieces, opponents }) {
     return (
