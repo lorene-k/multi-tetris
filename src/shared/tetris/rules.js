@@ -1,4 +1,4 @@
-import { BOARD_WIDTH, BOARD_HEIGHT, isInsideBoard, isCellEmpty, rotateN, getPieceShape } from './index.js';
+import { BOARD_WIDTH, BOARD_HEIGHT, isInsideBoard, isCellEmpty, rotateN, getPieceShape, PENALTY_CELL } from './index.js';
 
 export function canPlacePiece(board, piece) {
     const shape = getPieceShape(piece);
@@ -85,7 +85,7 @@ export function addPenaltyLines(board, numLines, rng) {
     if (numLines <= 0) return board;
     const addedLines = Array.from({ length: numLines }, () => {
         const holeIndex = Math.floor(rng() * BOARD_WIDTH);
-        return Array.from({ length: BOARD_WIDTH }, (_, x) => (x === holeIndex ? 0 : 1));
+        return Array.from({ length: BOARD_WIDTH }, (_, x) => (x === holeIndex ? 0 : PENALTY_CELL));
     });
 
     const newBoard = [...board.slice(numLines), ...addedLines];
@@ -107,9 +107,11 @@ export function mergePiece(board, piece) {
     return newBoard;
 }
 
+// A row clears only if it's full AND contains no indestructible penalty cells
+// A filled-in penalty line never clears
 export function clearLines(board) {
     const remainingRows = board.filter(
-        row => row.some(cell => cell === 0)
+        row => row.some(cell => cell === 0) || row.includes(PENALTY_CELL)
     );
     const clearedLines = BOARD_HEIGHT - remainingRows.length;
     const emptyRows = Array.from(

@@ -35,7 +35,10 @@ export const initEngine = (io) => {
                     callback({ ok: false, message: 'Game already in progress in this room. Wait for the next round.' });
                     return;
                 }
-                if (game.players.some(p => p.name === playerName)) {
+                // A name held by a socket that's no longer actually connected is
+                // stale (e.g. a client that navigated away is still disconnecting)
+                // and shouldn't block a fresh join.
+                if (game.players.some(p => p.name === playerName && p.socket.connected)) {
                     callback({ ok: false, message: 'Username is already taken in this room.' });
                     return;
                 }
@@ -58,10 +61,15 @@ export const initEngine = (io) => {
                 return;
             }
 
-            // Prevent duplicate names in the same room
-            if (game.players.some(p => p.name === playerName)) {
-                socket.emit('error', { message: 'Username is already taken in this room.' });
-                return;
+            // Evict a stale entry left behind by a socket that's no longer
+            // connected, instead of blocking the new join.
+            const existing = game.players.find(p => p.name === playerName);
+            if (existing) {
+                if (existing.socket.connected) {
+                    socket.emit('error', { message: 'Username is already taken in this room.' });
+                    return;
+                }
+                game.removePlayer(existing.socket.id);
             }
 
             const player = new Player(socket, playerName, room);

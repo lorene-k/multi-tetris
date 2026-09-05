@@ -5,7 +5,7 @@ import {
     canPlacePiece, mergePiece, clearLines, isGameOver,
     movePiece, rotatePiece, hardDrop, softDrop, addPenaltyLines,
     createPiece, getPieceShape,
-    createGameState,
+    createGameState, PENALTY_CELL,
 } from '../../src/shared/tetris/index.js';
 
 describe('rules.js', () => {
@@ -205,7 +205,7 @@ describe('rules.js', () => {
             bottom.forEach(row => {
                 const zeros = row.filter(c => c === 0).length;
                 expect(zeros).to.equal(1);
-                expect(row.filter(c => c === 1).length).to.equal(BOARD_WIDTH - 1);
+                expect(row.filter(c => c === PENALTY_CELL).length).to.equal(BOARD_WIDTH - 1);
             });
         });
 
@@ -286,6 +286,13 @@ describe('rules.js', () => {
         it('returns board with same dimensions', () => {
             const { board: b } = clearLines(board);
             expect(b).to.have.lengthOf(BOARD_HEIGHT);
+        });
+
+        it('does not clear a penalty line even when its gap is filled in', () => {
+            for (let x = 0; x < BOARD_WIDTH; x++) board[BOARD_HEIGHT - 1][x] = PENALTY_CELL;
+            board[BOARD_HEIGHT - 1][0] = 'T'; // player fills the one gap
+            const { clearedLines } = clearLines(board);
+            expect(clearedLines).to.equal(0);
         });
     });
 

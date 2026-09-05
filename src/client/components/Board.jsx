@@ -9,7 +9,7 @@ const PIECE_COLOR = {
     L: 'cell-orange',
     S: 'cell-green',
     Z: 'cell-red',
-    1: 'cell-grey',   // penalty lines
+    X: 'cell-grey',   // penalty lines
 };
 
 // Overlay active piece onto a copy of the board for rendering
