@@ -47,10 +47,6 @@ Game.prototype.removePlayer = function (socketId) {
     }
 };
 
-Game.prototype.getPlayer = function (socketId) {
-    return this.players.find(p => p.socket.id === socketId) || null;
-};
-
 Game.prototype.isEmpty = function () {
     return this.players.length === 0;
 };

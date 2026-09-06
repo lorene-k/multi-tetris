@@ -92,18 +92,6 @@ describe('Game', () => {
         });
     });
 
-    describe('getPlayer', () => {
-        it('returns player by socket id', () => {
-            const p = makePlayer('s99');
-            game.addPlayer(p);
-            expect(game.getPlayer('s99')).to.equal(p);
-        });
-
-        it('returns null for unknown socket id', () => {
-            expect(game.getPlayer('nobody')).to.be.null;
-        });
-    });
-
     describe('isEmpty', () => {
         it('returns true when no players', () => {
             expect(game.isEmpty()).to.be.true;

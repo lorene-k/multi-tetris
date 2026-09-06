@@ -22,9 +22,10 @@ const playerReducer = (state = initialState, action) => {
             };
 
         case 'player/joined':
-        case 'player/left':
-            // Update host status if the lobby players list changed
-            return state;
+        case 'player/left': {
+            const me = (action.payload.players || []).find(p => p.name === state.name);
+            return me ? { ...state, isHost: me.isHost } : state;
+        }
 
         default:
             return state;
