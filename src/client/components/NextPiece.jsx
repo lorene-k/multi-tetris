@@ -24,7 +24,7 @@ export function NextPiece({ type }) {
     const cols = maxX - minX + 1;
     const rows = maxY - minY + 1;
 
-    // Build a small grid for the preview
+    // Small grid for preview
     const grid = Array.from({ length: rows }, () => Array(cols).fill(false));
     shape.forEach(([x, y]) => {
         grid[y - minY][x - minX] = true;

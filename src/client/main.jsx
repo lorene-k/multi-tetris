@@ -9,10 +9,9 @@ import './style/index.css';
 
 const store = configureStore({
     reducer: rootReducer,
-    middleware: (getDefaultMiddleware) => getDefaultMiddleware(),
 });
 
-// Expose state for tests / debugging
+// Expose state for tests
 if (typeof window !== 'undefined') {
     store.subscribe(() => {
         window.__tetrisState = store.getState();
@@ -28,3 +27,4 @@ createRoot(document.getElementById('root')).render(
         </Provider>
     </StrictMode>,
 );
+

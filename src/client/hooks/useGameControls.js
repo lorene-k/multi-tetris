@@ -2,11 +2,11 @@ import { useEffect, useCallback } from 'react';
 import { sendInput } from '../socket/socket.js';
 
 const KEYBOARD_MAP = {
-    ArrowLeft:  'left',
+    ArrowLeft: 'left',
     ArrowRight: 'right',
-    ArrowUp:    'rotate',
-    ArrowDown:  'softDrop',
-    ' ':        'hardDrop',
+    ArrowUp: 'rotate',
+    ArrowDown: 'softDrop',
+    ' ': 'hardDrop',
 };
 
 // Wires keyboard input to sendInput() while `active` is true.

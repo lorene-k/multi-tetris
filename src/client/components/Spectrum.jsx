@@ -1,8 +1,7 @@
+import { BOARD_HEIGHT } from '../../shared/tetris/constants.js';
 import '../style/Spectrum.css';
 
 export function Spectrum({ name, spectrum, alive }) {
-    const maxHeight = 20;
-
     return (
         <div className={`spectrum-container ${alive ? '' : 'spectrum-dead'}`}>
             <div className="spectrum-name">{name}</div>
@@ -11,7 +10,7 @@ export function Spectrum({ name, spectrum, alive }) {
                     <div key={col} className="spectrum-col">
                         <div
                             className="spectrum-bar"
-                            style={{ height: `${(height / maxHeight) * 100}%` }}
+                            style={{ height: `${(height / BOARD_HEIGHT) * 100}%` }}
                         />
                     </div>
                 ))}

@@ -2,8 +2,6 @@ import { io } from 'socket.io-client';
 
 let _socket = null;
 
-export const getSocket = () => _socket;
-
 export const connectSocket = (dispatch) => {
     if (_socket) return _socket;
 

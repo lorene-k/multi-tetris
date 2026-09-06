@@ -1,6 +1,6 @@
 export function LeftPanel({ room, player, score, linesCleared }) {
     return (
-        < div className="game-left" >
+        <div className="game-left">
             <div className="info-panel">
                 <p className="info-row"><span className="info-label">Room</span><span className="info-value">{room}</span></p>
                 <p className="info-row"><span className="info-label">Player</span><span className="info-value">{player}</span></p>
