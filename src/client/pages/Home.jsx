@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { connectSocket, checkJoin } from '../socket/socket.js';
+import { connectSocket, checkJoin, disconnectSocket } from '../socket/socket.js';
 import '../style/Home.css';
 
 export default function Home() {
@@ -15,6 +15,7 @@ export default function Home() {
 
     useEffect(() => {
         connectSocket(dispatch);
+        return () => disconnectSocket();
     }, [dispatch]);
 
     const handlePlay = async () => {

@@ -21,7 +21,6 @@ const playerReducer = (state = initialState, action) => {
                 room: action.payload.room,
             };
 
-        case 'player/joined':
         case 'player/left': {
             const me = (action.payload.players || []).find(p => p.name === state.name);
             return me ? { ...state, isHost: me.isHost } : state;
