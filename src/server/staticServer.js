@@ -9,11 +9,12 @@ const mediaTypes = {
     '.css': 'text/css',
     '.svg': 'image/svg+xml',
     '.png': 'image/png',
+    '.ico': 'image/x-icon',
 };
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const projectRoot = join(__dirname, '..', '..', '..');
+const projectRoot = join(__dirname, '..', '..');
 const clientDist = join(projectRoot, 'src/client/dist');
 
 const logerror = debug('tetris:error');
@@ -25,7 +26,6 @@ export const initApp = (app, params, cb) => {
     const { host, port } = params;
 
     const handler = (req, res) => {
-        // Strip query strings from URL
         const urlPath = req.url.split('?')[0];
 
         const filePath = urlPath === '/'
@@ -57,7 +57,7 @@ export const initApp = (app, params, cb) => {
     app.on('request', handler);
 
     app.listen({ host, port }, () => {
-        loginfo(`tetris listen on ${params.url}`);
+        loginfo(`Multitetris server listening on ${params.url}`);
         cb();
     });
 };
