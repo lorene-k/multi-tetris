@@ -11,12 +11,6 @@ export default function Home() {
     const [checking, setChecking] = useState(false);
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const connected = useSelector(s => s.connection.connected);
-
-    useEffect(() => {
-        connectSocket(dispatch);
-        return () => disconnectSocket();
-    }, [dispatch]);
 
     const handlePlay = async () => {
         const player = name.trim();
@@ -25,18 +19,16 @@ export default function Home() {
             setError('Please enter a username and room name to play.');
             return;
         }
-        if (!connected) {
-            setError('Still connecting to the server, try again in a moment.');
-            return;
-        }
 
         setError('');
         setChecking(true);
-        const result = await checkJoin(roomName, player);
+        connectSocket(dispatch);
+        const res = await checkJoin(roomName, player);
+        disconnectSocket();
         setChecking(false);
 
-        if (!result.ok) {
-            setError(result.message);
+        if (!res.ok) {
+            setError(res.message);
             return;
         }
         navigate(`/${roomName}/${player}`);
