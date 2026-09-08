@@ -1,4 +1,4 @@
-# Red Tetris
+# Multi Tetris
 
 An online multiplayer Tetris game built in Javascript, with Node.js & socket.io on the server, React & Redux on the client.
 
