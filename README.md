@@ -24,8 +24,8 @@ This installs dependencies if needed, then runs the client (Vite dev server, def
 Run them separately if you only need one:
 
 ```bash
-make client   # Vite dev server only
-make server   # game server only (nodemon + debug logs)
+make client
+make server
 ```
 
 ### Production build
