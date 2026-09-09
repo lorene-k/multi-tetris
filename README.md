@@ -1,6 +1,7 @@
 # Multi Tetris
 
-An online multiplayer Tetris game built in Javascript, with Node.js & socket.io on the server, React & Redux on the client.
+An online multiplayer Tetris game built in JavaScript.
+Built with Node.js on the server, React and Redux on the client, with socket.io for real-time communication.
 
 ![Demo](media/demo.gif)
 
