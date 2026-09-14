@@ -43,7 +43,7 @@
 
 /* Dead player dimmed */
 .spectrum-dead .spectrum-bar {
-    background: var(--text-faint);
+    background: var(--text-muted);
     box-shadow: none;
 }
 
