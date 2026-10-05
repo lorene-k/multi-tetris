@@ -10,8 +10,8 @@ import { applyInput } from '../game/gameLoop.js';
 const QUEUE_MIN_AHEAD = 20;
 
 /**
- * Game – manages one room.
- * Prototype-based OO (server-side only; no `this` restriction here).
+ * Game – manages one room
+ * Prototype-based OO - server-side only, no `this` restriction
  */
 function Game(room) {
     this.room = room;
@@ -89,7 +89,6 @@ Game.prototype.reset = function (io) {
 };
 
 // -- Tick -------------------------------------------------------------------
-
 Game.prototype.tick = function () {
     let anyAlive = false;
 
@@ -145,7 +144,9 @@ Game.prototype.handleInput = function (player, input) {
         if (clearedLines > 0) this._penalise(player, clearedLines);
     } else {
         player.state = newState;
-        player.groundedTicks = 0;
+        if (softDrop(newState) !== newState) {
+            player.groundedTicks = 0;
+        }
     }
 
     player.emit('state_update', { ...player.state, linesCleared: emitLines });
