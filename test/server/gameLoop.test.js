@@ -7,13 +7,26 @@ import {
     generateRandomPiece,
 } from '../../src/shared/tetris/index.js';
 
+// Steps until the active piece is resting on the floor, without locking it
+function dropToFloor(state, rng) {
+    let current = state;
+    while (canPlacePiece(current.board, {
+        ...current.activePiece,
+        pos: { x: current.activePiece.pos.x, y: current.activePiece.pos.y + 1 },
+    })) {
+        current = step(current, rng);
+    }
+    return current;
+}
+
 describe('gameLoop.js', () => {
-    let activePiece, state, rng;
+    let state, rng;
 
     beforeEach(() => {
-        activePiece = createPiece({ type: 'I' });
-        state = createGameState(activePiece);
-        state = { ...state, nextPieces: ['O', 'I', 'L', 'J', 'S', 'Z', 'T'] };
+        state = {
+            ...createGameState(createPiece({ type: 'I' })),
+            nextPieces: ['O', 'I', 'L', 'J', 'S', 'Z', 'T'],
+        };
         rng = createRng('test-seed');
     });
 
@@ -27,28 +40,17 @@ describe('gameLoop.js', () => {
         });
 
         it('merges piece and spawns next when piece can no longer fall', () => {
-            let s = state;
-            // Drop piece to the bottom
-            while (canPlacePiece(s.board, { ...s.activePiece, pos: { x: s.activePiece.pos.x, y: s.activePiece.pos.y + 1 } })) {
-                s = step(s, rng);
-            }
-            const newState = step(s, rng);
+            const newState = step(dropToFloor(state, rng), rng);
             expect(newState.activePiece.type).to.not.equal(null);
-            const boardHasPiece = newState.board.some(row => row.some(c => c !== 0));
-            expect(boardHasPiece).to.be.true;
+            expect(newState.board.some(row => row.some(cell => cell !== 0))).to.be.true;
         });
 
         it('sets gameOver when piece spawns into occupied space', () => {
-            const filledBoard = createEmptyBoard_helper();
-            // Fill all but bottom row to make game over after piece lands
+            // Fill all rows but the top one, leaving a single column open
             const almostFull = Array.from({ length: BOARD_HEIGHT - 1 }, () =>
                 Array.from({ length: BOARD_WIDTH }, (_, x) => (x === 5 ? 0 : 1))
             );
-            const gameOverState = {
-                ...state,
-                board: [state.board[0], ...almostFull],
-            };
-            const newState = step(gameOverState, rng);
+            const newState = step({ ...state, board: [state.board[0], ...almostFull] }, rng);
             expect(newState.gameOver).to.equal(true);
         });
 
@@ -62,28 +64,19 @@ describe('gameLoop.js', () => {
             const filledBoard = Array.from({ length: BOARD_HEIGHT }, () =>
                 Array.from({ length: BOARD_WIDTH }, () => 1)
             );
-            const filledState = { ...state, board: filledBoard };
-            const newState = step(filledState, rng);
-            newState.board.forEach(row => {
-                expect(row.every(c => c === 0)).to.be.true;
-            });
+            const newState = step({ ...state, board: filledBoard }, rng);
+            newState.board.forEach(row => expect(row.every(cell => cell === 0)).to.be.true);
         });
 
         it('refills nextPieces from rng when empty and piece locks', () => {
-            let s = state;
-            // Drop to bottom
-            while (canPlacePiece(s.board, { ...s.activePiece, pos: { x: s.activePiece.pos.x, y: s.activePiece.pos.y + 1 } })) {
-                s = step(s, rng);
-            }
-            const emptyQueue = { ...s, nextPieces: [] };
-            const newState = step(emptyQueue, rng);
+            const grounded = dropToFloor(state, rng);
+            const newState = step({ ...grounded, nextPieces: [] }, rng);
             expect(newState.nextPieces).to.be.an('array');
         });
 
         it('returns same state if activePiece is null', () => {
             const noPiece = createGameState(null);
-            const result = step(noPiece, rng);
-            expect(result).to.equal(noPiece);
+            expect(step(noPiece, rng)).to.equal(noPiece);
         });
     });
 
@@ -101,9 +94,8 @@ describe('gameLoop.js', () => {
         });
 
         it('rotates piece (using T piece which can rotate at spawn)', () => {
-            const tPiece = createPiece({ type: 'T', pos: { x: 4, y: 3 } });
-            const s = createGameState(tPiece);
-            const newState = applyInput({ ...s, nextPieces: [] }, 'rotate');
+            const tState = createGameState(createPiece({ type: 'T', pos: { x: 4, y: 3 } }));
+            const newState = applyInput(tState, 'rotate');
             expect(newState.activePiece.rotation).to.equal(1);
         });
 
@@ -113,19 +105,16 @@ describe('gameLoop.js', () => {
         });
 
         it('hard drops piece (activePiece becomes null)', () => {
-            const newState = applyInput(state, 'hardDrop');
-            expect(newState.activePiece).to.be.null;
+            expect(applyInput(state, 'hardDrop').activePiece).to.be.null;
         });
 
         it('returns same state for unknown input', () => {
-            const result = applyInput(state, 'fly');
-            expect(result).to.equal(state);
+            expect(applyInput(state, 'fly')).to.equal(state);
         });
 
         it('returns same state if no active piece', () => {
-            const nopiece = createGameState(null);
-            const result = applyInput(nopiece, 'left');
-            expect(result).to.equal(nopiece);
+            const noPiece = createGameState(null);
+            expect(applyInput(noPiece, 'left')).to.equal(noPiece);
         });
     });
 
@@ -133,9 +122,7 @@ describe('gameLoop.js', () => {
 
     describe('createRng', () => {
         it('returns consistent results for the same seed', () => {
-            const r1 = createRng('seed');
-            const r2 = createRng('seed');
-            expect(generateRandomPiece(r1)).to.equal(generateRandomPiece(r2));
+            expect(generateRandomPiece(createRng('seed'))).to.equal(generateRandomPiece(createRng('seed')));
         });
 
         it('returns different results for different seeds', () => {
@@ -144,8 +131,7 @@ describe('gameLoop.js', () => {
             // Generate many pieces; at least one pair should differ
             const seq1 = Array.from({ length: 20 }, () => generateRandomPiece(r1));
             const seq2 = Array.from({ length: 20 }, () => generateRandomPiece(r2));
-            const allSame = seq1.every((t, i) => t === seq2[i]);
-            expect(allSame).to.be.false;
+            expect(seq1.every((type, i) => type === seq2[i])).to.be.false;
         });
     });
 
@@ -165,11 +151,10 @@ describe('gameLoop.js', () => {
         });
 
         it('initialises game state correctly', () => {
-            const s = game.getState();
-            expect(s).to.have.property('board');
-            expect(s).to.have.property('activePiece');
-            expect(s).to.have.property('nextPieces');
-            expect(s.nextPieces).to.be.an('array');
+            const state = game.getState();
+            expect(state).to.have.property('board');
+            expect(state).to.have.property('activePiece');
+            expect(state.nextPieces).to.be.an('array');
         });
 
         it('has an active piece at start', () => {
@@ -177,22 +162,16 @@ describe('gameLoop.js', () => {
         });
 
         it('updates state on each tick', () => {
-            const s1 = game.getState();
+            const before = game.getState();
             clock.tick(TICK_RATE_MS);
-            const s2 = game.getState();
-            expect(s2).to.not.deep.equal(s1);
+            expect(game.getState()).to.not.deep.equal(before);
         });
 
         it('stop() halts the loop', () => {
             game.stop();
-            const s1 = game.getState();
+            const before = game.getState();
             clock.tick(TICK_RATE_MS * 10);
-            const s2 = game.getState();
-            expect(s2).to.deep.equal(s1);
+            expect(game.getState()).to.deep.equal(before);
         });
     });
 });
-
-function createEmptyBoard_helper() {
-    return Array.from({ length: BOARD_HEIGHT }, () => Array(BOARD_WIDTH).fill(0));
-}

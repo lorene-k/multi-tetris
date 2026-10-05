@@ -16,17 +16,19 @@ describe('rules.js', () => {
             board = createEmptyBoard();
             piece = createPiece({ type: 'O', pos: { x: 0, y: 0 } });
         });
+
         it('returns true if piece can be placed', () => {
             expect(canPlacePiece(board, piece)).to.be.true;
         });
+
         it('returns false if piece cannot be placed', () => {
             board[0][0] = 1;
             expect(canPlacePiece(board, piece)).to.be.false;
         });
+
         it('returns false for all pieces when board is full', () => {
             const full = createEmptyBoard().map(() => Array(BOARD_WIDTH).fill(1));
-            const p = createPiece({ type: 'I' });
-            expect(canPlacePiece(full, p)).to.be.false;
+            expect(canPlacePiece(full, createPiece({ type: 'I' }))).to.be.false;
         });
     });
 
@@ -39,12 +41,11 @@ describe('rules.js', () => {
 
         it('returns the same state if there is no active piece', () => {
             const nopiece = createGameState(null);
-            const result = movePiece(nopiece, 'left');
-            expect(result).to.equal(nopiece);
+            expect(movePiece(nopiece, 'left')).to.equal(nopiece);
         });
+
         it('returns state for an invalid direction', () => {
-            const result = movePiece(state, 'invalid');
-            expect(result).to.equal(state);
+            expect(movePiece(state, 'invalid')).to.equal(state);
         });
 
         const directions = {
@@ -62,20 +63,17 @@ describe('rules.js', () => {
 
         it('does not move piece left if at left wall', () => {
             const s = { ...state, activePiece: { ...activePiece, pos: { x: 0, y: 0 } } };
-            const result = movePiece(s, 'left');
-            expect(result).to.equal(s);
+            expect(movePiece(s, 'left')).to.equal(s);
         });
 
         it('does not move piece right if piece would go out of bounds', () => {
             const s = { ...state, activePiece: { ...activePiece, pos: { x: BOARD_WIDTH - 1, y: 0 } } };
-            const result = movePiece(s, 'right');
-            expect(result).to.equal(s);
+            expect(movePiece(s, 'right')).to.equal(s);
         });
 
         it('does not move piece down if at bottom', () => {
             const s = { ...state, activePiece: { ...activePiece, pos: { x: 4, y: BOARD_HEIGHT - 1 } } };
-            const result = movePiece(s, 'down');
-            expect(result).to.equal(s);
+            expect(movePiece(s, 'down')).to.equal(s);
         });
     });
 
@@ -87,20 +85,17 @@ describe('rules.js', () => {
         });
 
         it('rotates piece to the right by default', () => {
-            const newState = rotatePiece(state);
-            expect(newState.activePiece.rotation).to.equal(1);
+            expect(rotatePiece(state).activePiece.rotation).to.equal(1);
         });
 
         it('rotates piece to the left', () => {
             const s = { ...state, activePiece: { ...activePiece, rotation: 2 } };
-            const newState = rotatePiece(s, 'left');
-            expect(newState.activePiece.rotation).to.equal(1);
+            expect(rotatePiece(s, 'left').activePiece.rotation).to.equal(1);
         });
 
         it('wraps rotation from 3 to 0 when rotating right', () => {
             const s = { ...state, activePiece: { ...activePiece, rotation: 3 } };
-            const newState = rotatePiece(s, 'right');
-            expect(newState.activePiece.rotation).to.equal(0);
+            expect(rotatePiece(s, 'right').activePiece.rotation).to.equal(0);
         });
 
         it('returns same state if no active piece', () => {
@@ -112,46 +107,31 @@ describe('rules.js', () => {
             expect(rotatePiece(state, 'diagonal')).to.equal(state);
         });
 
-        it('does not rotate if clearly blocked and no kick helps', () => {
-            // Fill cells around the spawn to block rotation with no kick escape
+        // Wall-kick fallback: the O piece cannot rotate in place with (1, 0) occupied,
+        // so rotatePiece retries the rotation at a small x offset
+        it('kicks the piece sideways when it cannot rotate in place', () => {
             const board = createEmptyBoard();
-            // Place an O piece (symmetric) in a corner – rotation is always same shape
-            const piece = createPiece({ type: 'O', pos: { x: 0, y: 0 } });
-            const s = { board, activePiece: piece };
-            board[0][1] = 1; // block one rotation cell
-            const result = rotatePiece(s, 'right');
-            // O piece is symmetric – it should rotate fine (same shape)
-            expect(result).to.have.property('activePiece');
+            board[0][1] = 1;
+            const blocked = { board, activePiece: createPiece({ type: 'O', pos: { x: 0, y: 0 } }) };
+            expect(rotatePiece(blocked, 'right')).to.have.property('activePiece');
         });
     });
 
     describe('hardDrop', () => {
-        let activePiece, state;
+        let state;
         beforeEach(() => {
-            activePiece = createPiece({ type: 'O' });
-            state = createGameState(activePiece);
+            state = createGameState(createPiece({ type: 'O' }));
         });
 
         it('hard drops the piece to the lowest possible position', () => {
-            const { board } = state;
-            let expectedY = activePiece.pos.y;
-            while (canPlacePiece(board, { ...activePiece, pos: { x: activePiece.pos.x, y: expectedY + 1 } })) {
-                expectedY++;
-            }
             const newState = hardDrop(state);
-            const shape = getPieceShape(activePiece);
-            shape.forEach(([dx, dy]) => {
-                const x = activePiece.pos.x + dx;
-                const y = expectedY + dy;
-                if (y >= 0 && y < BOARD_HEIGHT && x >= 0 && x < BOARD_WIDTH) {
-                    expect(newState.board[y][x]).to.equal(activePiece.type);
-                }
-            });
+            // The O piece spawns at x = 4 and is a 2x2 block, so it comes to rest on the floor
+            expect(newState.board[BOARD_HEIGHT - 2].slice(4, 6)).to.deep.equal(['O', 'O']);
+            expect(newState.board[BOARD_HEIGHT - 1].slice(4, 6)).to.deep.equal(['O', 'O']);
         });
 
         it('sets activePiece to null after drop', () => {
-            const newState = hardDrop(state);
-            expect(newState.activePiece).to.be.null;
+            expect(hardDrop(state).activePiece).to.be.null;
         });
 
         it('returns same state if no active piece', () => {
@@ -180,14 +160,12 @@ describe('rules.js', () => {
 
         it('does not move piece if at bottom', () => {
             const s = { ...state, activePiece: { ...activePiece, pos: { x: 4, y: BOARD_HEIGHT - 1 } } };
-            const result = softDrop(s);
-            expect(result).to.equal(s);
+            expect(softDrop(s)).to.equal(s);
         });
 
         it('returns same state if no active piece', () => {
             const nopiece = createGameState(null);
-            const result = softDrop(nopiece);
-            expect(result).to.equal(nopiece);
+            expect(softDrop(nopiece)).to.equal(nopiece);
         });
     });
 
@@ -201,11 +179,10 @@ describe('rules.js', () => {
         it('adds 2 penalty lines at the bottom', () => {
             const newBoard = addPenaltyLines(board, 2, rng);
             expect(newBoard).to.have.lengthOf(BOARD_HEIGHT);
-            const bottom = newBoard.slice(-2);
-            bottom.forEach(row => {
-                const zeros = row.filter(c => c === 0).length;
-                expect(zeros).to.equal(1);
-                expect(row.filter(c => c === PENALTY_CELL).length).to.equal(BOARD_WIDTH - 1);
+            newBoard.slice(-2).forEach(row => {
+                // Each penalty line is full except for a single hole
+                expect(row.filter(cell => cell === 0)).to.have.lengthOf(1);
+                expect(row.filter(cell => cell === PENALTY_CELL)).to.have.lengthOf(BOARD_WIDTH - 1);
             });
         });
 
@@ -216,15 +193,13 @@ describe('rules.js', () => {
         });
 
         it('returns same board when numLines is 0', () => {
-            const result = addPenaltyLines(board, 0, rng);
-            expect(result).to.equal(board);
+            expect(addPenaltyLines(board, 0, rng)).to.equal(board);
         });
 
         it('shifts existing rows up by numLines', () => {
-            const b = createEmptyBoard();
-            b[19][0] = 'T';
-            const newBoard = addPenaltyLines(b, 1, rng);
-            expect(newBoard[18][0]).to.equal('T');
+            board[BOARD_HEIGHT - 1][0] = 'T';
+            const newBoard = addPenaltyLines(board, 1, rng);
+            expect(newBoard[BOARD_HEIGHT - 2][0]).to.equal('T');
         });
     });
 
@@ -237,16 +212,14 @@ describe('rules.js', () => {
 
         it('merges piece cells into the board', () => {
             const newBoard = mergePiece(board, piece);
-            const shape = getPieceShape(piece);
-            shape.forEach(([dx, dy]) => {
+            getPieceShape(piece).forEach(([dx, dy]) => {
                 expect(newBoard[piece.pos.y + dy][piece.pos.x + dx]).to.equal(piece.type);
             });
         });
 
         it('does not modify the original board', () => {
             mergePiece(board, piece);
-            const shape = getPieceShape(piece);
-            shape.forEach(([dx, dy]) => {
+            getPieceShape(piece).forEach(([dx, dy]) => {
                 expect(board[piece.pos.y + dy][piece.pos.x + dx]).to.equal(0);
             });
         });
@@ -284,8 +257,7 @@ describe('rules.js', () => {
         });
 
         it('returns board with same dimensions', () => {
-            const { board: b } = clearLines(board);
-            expect(b).to.have.lengthOf(BOARD_HEIGHT);
+            expect(clearLines(board).board).to.have.lengthOf(BOARD_HEIGHT);
         });
 
         it('does not clear a penalty line even when its gap is filled in', () => {

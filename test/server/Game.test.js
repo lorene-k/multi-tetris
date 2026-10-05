@@ -2,43 +2,55 @@ import { expect } from 'chai';
 import sinon from 'sinon';
 import Game from '../../src/server/classes/Game.js';
 import Player from '../../src/server/classes/Player.js';
-import { BOARD_WIDTH, BOARD_HEIGHT } from '../../src/shared/tetris/index.js';
+import { TICK_RATE_MS } from '../../src/shared/tetris/index.js';
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
-const makeMockIo = () => {
+// Game and Player only ever use `socket.id` and `socket.emit`,
+// so a recording object is enough to stand in for a real socket.
+function makePlayer(socketId, name) {
+    const socket = {
+        id: socketId,
+        msgs: [],
+        emit(event, data) { this.msgs.push({ event, data }); },
+    };
+    return new Player(socket, name, 'testRoom');
+}
+
+// Game only uses `io.to(room).emit(...)`, to announce game_over
+function makeIo() {
     const emitted = [];
     return {
         emitted,
-        to(room) {
+        to() {
             return {
-                emit(event, data) { emitted.push({ room, event, data }); },
+                emit(event, data) { emitted.push({ event, data }); },
             };
         },
     };
-};
+}
 
-const makeMockSocket = (id = 'sock') => {
-    const msgs = [];
-    return {
-        id,
-        msgs,
-        emit(event, data) { msgs.push({ event, data }); },
-        join() {},
-    };
-};
-
-const makePlayer = (id = 'p1', name = 'Alice', room = 'test') =>
-    new Player(makeMockSocket(id), name, room);
+// Adds one player per name, starts the game, then drops the start-up
+// messages so each test only sees what it triggers itself.
+function startGameWith(game, io, names) {
+    const players = names.map((name, index) => makePlayer(`s${index + 1}`, name));
+    players.forEach(player => game.addPlayer(player));
+    game.start(io);
+    players.forEach(player => { player.socket.msgs.length = 0; });
+    return players;
+}
 
 // ── Tests ──────────────────────────────────────────────────────────────────
 
 describe('Game', () => {
+    let game, io;
 
-    let game;
     beforeEach(() => {
         game = new Game('testRoom');
+        io = makeIo();
     });
+
+    afterEach(() => { game.stop(); });
 
     it('creates a game with correct room name', () => {
         expect(game.room).to.equal('testRoom');
@@ -51,17 +63,16 @@ describe('Game', () => {
 
     describe('addPlayer', () => {
         it('adds a player and sets them as host if first', () => {
-            const p = makePlayer();
-            game.addPlayer(p);
-            expect(game.players).to.include(p);
-            expect(game.host).to.equal(p);
+            const player = makePlayer('s1', 'Alice');
+            game.addPlayer(player);
+            expect(game.players).to.include(player);
+            expect(game.host).to.equal(player);
         });
 
         it('second player is not host', () => {
-            const p1 = makePlayer('s1', 'A');
-            const p2 = makePlayer('s2', 'B');
+            const p1 = makePlayer('s1', 'Alice');
             game.addPlayer(p1);
-            game.addPlayer(p2);
+            game.addPlayer(makePlayer('s2', 'Bob'));
             expect(game.host).to.equal(p1);
             expect(game.players).to.have.lengthOf(2);
         });
@@ -69,24 +80,21 @@ describe('Game', () => {
 
     describe('removePlayer', () => {
         it('removes a player by socket id', () => {
-            const p = makePlayer('s1');
-            game.addPlayer(p);
+            game.addPlayer(makePlayer('s1', 'Alice'));
             game.removePlayer('s1');
             expect(game.players).to.have.lengthOf(0);
         });
 
         it('assigns a new host when host leaves', () => {
-            const p1 = makePlayer('s1', 'A');
-            const p2 = makePlayer('s2', 'B');
-            game.addPlayer(p1);
+            const p2 = makePlayer('s2', 'Bob');
+            game.addPlayer(makePlayer('s1', 'Alice'));
             game.addPlayer(p2);
             game.removePlayer('s1');
             expect(game.host).to.equal(p2);
         });
 
         it('sets host to null when last player leaves', () => {
-            const p = makePlayer('s1');
-            game.addPlayer(p);
+            game.addPlayer(makePlayer('s1', 'Alice'));
             game.removePlayer('s1');
             expect(game.host).to.be.null;
         });
@@ -96,8 +104,9 @@ describe('Game', () => {
         it('returns true when no players', () => {
             expect(game.isEmpty()).to.be.true;
         });
+
         it('returns false when there are players', () => {
-            game.addPlayer(makePlayer());
+            game.addPlayer(makePlayer('s1', 'Alice'));
             expect(game.isEmpty()).to.be.false;
         });
     });
@@ -106,7 +115,6 @@ describe('Game', () => {
 
     describe('ensureQueue', () => {
         it('fills queue to at least QUEUE_MIN_AHEAD elements', () => {
-            const rng = { calls: 0, fn: () => 0.5 };
             game.rng = () => 0.5;
             game.ensureQueue(0);
             expect(game.pieceQueue.length).to.be.greaterThanOrEqual(20);
@@ -122,13 +130,13 @@ describe('Game', () => {
     // ── start / stop ───────────────────────────────────────────────────────
 
     describe('start / stop', () => {
-        let clock, io, p1;
+        let clock, p1;
 
         beforeEach(() => {
             clock = sinon.useFakeTimers();
-            io = makeMockIo();
             p1 = makePlayer('s1', 'Alice');
             game.addPlayer(p1);
+            game.start(io);
         });
 
         afterEach(() => {
@@ -137,40 +145,33 @@ describe('Game', () => {
         });
 
         it('starts the game and sets started = true', () => {
-            game.start(io);
             expect(game.started).to.be.true;
         });
 
         it('initialises all player states', () => {
-            game.start(io);
             expect(p1.alive).to.be.true;
             expect(p1.state.activePiece).to.not.be.null;
         });
 
         it('emits game_started to each player', () => {
-            game.start(io);
-            const msg = p1.socket.msgs.find(m => m.event === 'game_started');
-            expect(msg).to.exist;
+            expect(p1.socket.msgs.find(m => m.event === 'game_started')).to.exist;
         });
 
         it('emits state_update to each player', () => {
-            game.start(io);
             const msg = p1.socket.msgs.find(m => m.event === 'state_update');
             expect(msg).to.exist;
             expect(msg.data).to.have.property('board');
         });
 
         it('stop() clears the interval and sets started = false', () => {
-            game.start(io);
             game.stop();
             expect(game.started).to.be.false;
             expect(game.interval).to.be.null;
         });
 
         it('advances game state on tick', () => {
-            game.start(io);
             const initialY = p1.state.activePiece.pos.y;
-            clock.tick(500); // one tick
+            clock.tick(TICK_RATE_MS);
             expect(p1.state.activePiece.pos.y).to.be.greaterThan(initialY);
         });
     });
@@ -178,17 +179,11 @@ describe('Game', () => {
     // ── handleInput ────────────────────────────────────────────────────────
 
     describe('handleInput', () => {
-        let io, p1;
+        let p1;
 
         beforeEach(() => {
-            io = makeMockIo();
-            p1 = makePlayer('s1', 'Alice');
-            game.addPlayer(p1);
-            game.start(io);
-            p1.socket.msgs.length = 0; // clear setup messages
+            [p1] = startGameWith(game, io, ['Alice']);
         });
-
-        afterEach(() => { game.stop(); });
 
         it('moves piece left on left input', () => {
             const xBefore = p1.state.activePiece.pos.x;
@@ -203,25 +198,22 @@ describe('Game', () => {
         });
 
         it('rotates piece on rotate input', () => {
-            // Move piece down so it has room to rotate away from the top wall
+            // Move the piece down so it has room to rotate away from the top wall
             game.handleInput(p1, 'softDrop');
             game.handleInput(p1, 'softDrop');
             game.handleInput(p1, 'softDrop');
-            const rotBefore = p1.state.activePiece.rotation;
+            const rotationBefore = p1.state.activePiece.rotation;
             game.handleInput(p1, 'rotate');
-            expect(p1.state.activePiece.rotation).to.equal((rotBefore + 1) % 4);
+            expect(p1.state.activePiece.rotation).to.equal((rotationBefore + 1) % 4);
         });
 
         it('emits state_update after input', () => {
             game.handleInput(p1, 'left');
-            const update = p1.socket.msgs.find(m => m.event === 'state_update');
-            expect(update).to.exist;
+            expect(p1.socket.msgs.find(m => m.event === 'state_update')).to.exist;
         });
 
         it('handles hardDrop: spawns next piece', () => {
-            const typeBefore = p1.state.activePiece.type;
             game.handleInput(p1, 'hardDrop');
-            // After hard drop, new piece should be spawned (or game over)
             expect(p1.state).to.have.property('activePiece');
         });
 
@@ -236,32 +228,21 @@ describe('Game', () => {
     // ── Penalty lines ──────────────────────────────────────────────────────
 
     describe('_penalise', () => {
-        let io, p1, p2;
+        let p1, p2;
 
         beforeEach(() => {
-            io = makeMockIo();
-            p1 = makePlayer('s1', 'Alice');
-            p2 = makePlayer('s2', 'Bob');
-            game.addPlayer(p1);
-            game.addPlayer(p2);
-            game.start(io);
-            p1.socket.msgs.length = 0;
-            p2.socket.msgs.length = 0;
+            [p1, p2] = startGameWith(game, io, ['Alice', 'Bob']);
         });
 
-        afterEach(() => { game.stop(); });
-
-        it('sends penalty lines to opponents when ≥2 lines cleared', () => {
-            const boardBefore = p2.state.board.map(r => [...r]);
-            game._penalise(p1, 2); // 1 penalty line to p2
-            // p2 board should have changed
+        it('sends penalty lines to opponents when >= 2 lines cleared', () => {
+            const boardBefore = p2.state.board.map(row => [...row]);
+            game._penalise(p1, 2); // 1 penalty line for p2
             expect(p2.state.board).to.not.deep.equal(boardBefore);
-            const update = p2.socket.msgs.find(m => m.event === 'state_update');
-            expect(update).to.exist;
+            expect(p2.socket.msgs.find(m => m.event === 'state_update')).to.exist;
         });
 
         it('sends no penalty for exactly 1 line cleared', () => {
-            const boardBefore = p2.state.board.map(r => [...r]);
+            const boardBefore = p2.state.board.map(row => [...row]);
             game._penalise(p1, 1);
             expect(p2.state.board).to.deep.equal(boardBefore);
         });
@@ -270,18 +251,11 @@ describe('Game', () => {
     // ── _checkEnd ─────────────────────────────────────────────────────────
 
     describe('_checkEnd', () => {
-        let io, p1, p2;
+        let p1, p2;
 
         beforeEach(() => {
-            io = makeMockIo();
-            p1 = makePlayer('s1', 'Alice');
-            p2 = makePlayer('s2', 'Bob');
-            game.addPlayer(p1);
-            game.addPlayer(p2);
-            game.start(io);
+            [p1, p2] = startGameWith(game, io, ['Alice', 'Bob']);
         });
-
-        afterEach(() => { game.stop(); });
 
         it('ends the game when only one player is alive', () => {
             p1.alive = false;
@@ -301,42 +275,28 @@ describe('Game', () => {
             p1.alive = false;
             p2.alive = false;
             game._checkEnd();
-            const msg = io.emitted.find(m => m.event === 'game_over');
-            expect(msg.data.winner).to.be.null;
+            expect(io.emitted.find(m => m.event === 'game_over').data.winner).to.be.null;
         });
     });
 
     // ── Spectrum ──────────────────────────────────────────────────────────
 
     describe('broadcastSpectrums', () => {
-        let io, p1, p2;
+        let p1, p2;
 
         beforeEach(() => {
-            io = makeMockIo();
-            p1 = makePlayer('s1', 'Alice');
-            p2 = makePlayer('s2', 'Bob');
-            game.addPlayer(p1);
-            game.addPlayer(p2);
-            game.start(io);
-            p1.socket.msgs.length = 0;
-            p2.socket.msgs.length = 0;
+            [p1, p2] = startGameWith(game, io, ['Alice', 'Bob']);
+            game.broadcastSpectrums();
         });
 
-        afterEach(() => { game.stop(); });
-
         it('emits opponents_update to each player', () => {
-            game.broadcastSpectrums();
-            const msg1 = p1.socket.msgs.find(m => m.event === 'opponents_update');
-            const msg2 = p2.socket.msgs.find(m => m.event === 'opponents_update');
-            expect(msg1).to.exist;
-            expect(msg2).to.exist;
+            expect(p1.socket.msgs.find(m => m.event === 'opponents_update')).to.exist;
+            expect(p2.socket.msgs.find(m => m.event === 'opponents_update')).to.exist;
         });
 
         it('each player does not see themselves in opponents', () => {
-            game.broadcastSpectrums();
-            const msg1 = p1.socket.msgs.find(m => m.event === 'opponents_update');
-            const names = msg1.data.map(o => o.name);
-            expect(names).to.not.include('Alice');
+            const msg = p1.socket.msgs.find(m => m.event === 'opponents_update');
+            expect(msg.data.map(opponent => opponent.name)).to.not.include('Alice');
         });
     });
 });
