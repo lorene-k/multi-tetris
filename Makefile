@@ -20,4 +20,7 @@ server:		install
 test:		install
 			@npm test
 
-.PHONY: all dev test client server install
+coverage:	install
+			@npm run coverage
+
+.PHONY: all dev test coverage client server install
