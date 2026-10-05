@@ -23,8 +23,6 @@
     gap: 2px;
 }
 
-/* Cell size tracks viewport height so the board fills the screen at any
-   window size, instead of a fixed pixel size with breakpoint overrides. */
 .cell {
     width: clamp(20px, 3.8vh, 48px);
     height: clamp(20px, 3.8vh, 48px);
