@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import sinon from 'sinon';
 import Game from '../../src/server/classes/Game.js';
 import Player from '../../src/server/classes/Player.js';
-import { TICK_RATE_MS } from '../../src/shared/tetris/index.js';
+import { TICK_RATE_MS, BOARD_HEIGHT } from '../../src/shared/tetris/index.js';
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -212,9 +212,12 @@ describe('Game', () => {
             expect(p1.socket.msgs.find(m => m.event === 'state_update')).to.exist;
         });
 
-        it('handles hardDrop: spawns next piece', () => {
+        it('handles hardDrop: locks the piece and spawns the next one', () => {
+            const pieceIdxBefore = p1.pieceIdx;
             game.handleInput(p1, 'hardDrop');
-            expect(p1.state).to.have.property('activePiece');
+            expect(p1.state.activePiece).to.not.be.null;
+            expect(p1.pieceIdx).to.equal(pieceIdxBefore + 1);
+            expect(p1.state.board[BOARD_HEIGHT - 1].some(cell => cell !== 0)).to.be.true;
         });
 
         it('does nothing when player is not alive', () => {
