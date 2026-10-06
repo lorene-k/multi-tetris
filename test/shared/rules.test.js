@@ -108,12 +108,14 @@ describe('rules.js', () => {
         });
 
         // Wall-kick fallback: the O piece cannot rotate in place with (1, 0) occupied,
-        // so rotatePiece retries the rotation at a small x offset
+        // nor at offset +1 (still blocked) or -1 (out of bounds), so it settles at +2
         it('kicks the piece sideways when it cannot rotate in place', () => {
             const board = createEmptyBoard();
             board[0][1] = 1;
             const blocked = { board, activePiece: createPiece({ type: 'O', pos: { x: 0, y: 0 } }) };
-            expect(rotatePiece(blocked, 'right')).to.have.property('activePiece');
+            const result = rotatePiece(blocked, 'right');
+            expect(result.activePiece.rotation).to.equal(1);
+            expect(result.activePiece.pos).to.deep.equal({ x: 2, y: 0 });
         });
     });
 
